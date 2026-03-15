@@ -5,6 +5,16 @@ import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
   {
+    label: "Post Instagram",
+    href: "/dashboard/post",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="3" />
+        <path d="M8 12h8M12 8v8" />
+      </svg>
+    ),
+  },
+  {
     label: "Planning",
     href: "/dashboard/planning",
     icon: (
@@ -37,7 +47,7 @@ const NAV_ITEMS = [
     ),
   },
   {
-    label: "Hooks Instagram",
+    label: "Accroches Instagram",
     href: "/dashboard/hooks",
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">

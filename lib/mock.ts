@@ -19,6 +19,7 @@ import type {
   CarouselOutput,
   DMOutput,
   HooksOutput,
+  PostOutput,
 } from "./prompts";
 
 // ── Détection du mode mock ─────────────────────────────────────────────────────
@@ -652,6 +653,70 @@ export function getMockDM(): DMOutput {
       "Bonjour ! Oui bien sûr, il me reste quelques créneaux cette semaine. Tu es disponible plutôt en matinée ou l'après-midi ? Je t'envoie les horaires dès que tu me le dis 🌸",
     premium:
       "Bonjour ! Super contente d'avoir de tes nouvelles 😊 Il me reste effectivement des disponibilités cette semaine, notamment jeudi matin et vendredi après-midi. Pour ce type de soin, je prévois environ 1h30 pour qu'on soit tranquilles et que le résultat soit vraiment optimal. Tu veux qu'on réserve un de ces créneaux ? Je t'envoie tous les détails dès confirmation 🌿",
+  };
+}
+
+// ── Mock Post ──────────────────────────────────────────────────────────────────
+
+/**
+ * Retourne un PostOutput fictif adapté au type de post demandé.
+ * Utilisé en mode MOCK_GENERATION=true et pour les générations gratuites.
+ */
+export function getMockPost(typePost: string): PostOutput {
+  const type = typePost.toLowerCase();
+
+  if (type.includes("avant") || type.includes("apres") || type.includes("après")) {
+    return {
+      hook: "Aujourd'hui j'ai transformé les cils de ma cliente ✨",
+      caption:
+        "Aujourd'hui j'ai transformé les cils de ma cliente ✨\n\nElle voulait un résultat naturel mais plus intense.\n\nRésultat : volume russe dense, courbe parfaite, regard ouvert.\n\nVous préférez volume russe ou classique ?\n\n📍 Réservation en DM",
+      hashtags: ["#avantaprès", "#extensionsdecils", "#lashtech", "#transformation", "#cilsparfaits"],
+      ideeStory: "Révèle le résultat progressivement avec un slider avant/après.",
+      ideeReel: "Transition avant/après en Reel avec effet split-screen et texte 'sans filtre'.",
+    };
+  }
+
+  if (type.includes("promo") || type.includes("offre")) {
+    return {
+      hook: "Il reste 2 créneaux disponibles cette semaine 🗓️",
+      caption:
+        "Il reste 2 créneaux disponibles cette semaine 🗓️\n\nSi tu penses depuis quelques temps à prendre soin de tes cils, c'est le moment.\n\nPose complète · Résultat immédiat · Tient 4 à 6 semaines.\n\nEnvoie-moi 'RDV' en DM pour réserver ta place 📩\n\nPlaces vraiment limitées cette semaine.",
+      hashtags: ["#disponibilités", "#extensionsdecils", "#réservation", "#cilsbeaux", "#beauté"],
+      ideeStory: "Compte à rebours : créneaux encore disponibles cette semaine.",
+      ideeReel: null,
+    };
+  }
+
+  if (type.includes("conseil") || type.includes("beauté")) {
+    return {
+      hook: "Tu fais peut-être cette erreur avec tes extensions sans le savoir 👀",
+      caption:
+        "Tu fais peut-être cette erreur avec tes extensions sans le savoir 👀\n\nUtiliser un démaquillant huileux près de tes cils.\n\nL'huile dissout la colle des extensions. Résultat : tes cils tombent en moins d'une semaine.\n\nCe que je recommande :\n→ Démaquillant sans huile et sans alcool\n→ Appliquer avec une brosse douce\n→ Sécher en tamponnant — jamais en frottant\n\nSauvegarde ce post 💾 pour t'en souvenir !",
+      hashtags: ["#conseilcils", "#extensionsdecils", "#lashcare", "#entretienCils", "#astucesbeauté"],
+      ideeStory: "Quiz : tu utilises quoi comme démaquillant en ce moment ?",
+      ideeReel: "Démontre la différence entre un démaquillant huileux et un démaquillant adapté en 20 secondes.",
+    };
+  }
+
+  if (type.includes("dm") || type.includes("réponse") || type.includes("reponse")) {
+    return {
+      hook: "La question que je reçois le plus souvent en DM :",
+      caption:
+        "La question que je reçois le plus souvent en DM :\n\n'Combien de temps durent les extensions ?'\n\nLa réponse honnête : entre 3 et 6 semaines selon tes habitudes.\n\nCe qui fait vraiment la différence :\n→ tu dors sur le dos\n→ tu évites la vapeur et le sauna\n→ tu brosses tes cils chaque matin\n\nSi tu coches ces 3 cases, tes extensions tiennent facilement 5 à 6 semaines.\n\nD'autres questions ? Envoie-moi un DM 📩",
+      hashtags: ["#faq", "#extensionsdecils", "#durabilité", "#conseilcils", "#lashtech"],
+      ideeStory: "Sondage : tu dors sur le dos ou sur le ventre ?",
+      ideeReel: "Réponds à la question en vidéo de 30 secondes, ton naturel et direct.",
+    };
+  }
+
+  // Défaut : type "attirer des clientes"
+  return {
+    hook: "Aujourd'hui j'ai travaillé sur un volume russe naturel ✨",
+    caption:
+      "Aujourd'hui j'ai travaillé sur un volume russe naturel ✨\n\nLe but était de garder un regard intense mais élégant.\n\nRésultat juste après la pose 👇\n\nQui préfère ce style ?\n\n📍 Réservation en DM",
+    hashtags: ["#extensionsdecils", "#lashartist", "#lashtech", "#beauté", "#volumeRusse"],
+    ideeStory: "Montre le résultat en story avec un slider avant/après.",
+    ideeReel: "Timelapse de la pose en 30 secondes avec le résultat final.",
   };
 }
 

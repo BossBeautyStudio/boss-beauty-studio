@@ -30,6 +30,9 @@ import { createServiceClient } from "./supabase/server";
 /** Plafond mensuel par défaut. Réutilisé dans le cron reset-quotas. */
 export const MONTHLY_LIMIT = 30;
 
+/** Nombre de générations gratuites autorisées sans abonnement actif. */
+export const FREE_LIMIT = 3;
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface QuotaStatus {
@@ -175,6 +178,68 @@ export async function incrementQuota(userId: string): Promise<void> {
     throw new Error(
       `[quota] incrementQuota update failed: ${updateError.message}`
     );
+  }
+}
+
+// ── checkFreeQuota ────────────────────────────────────────────────────────────
+
+export interface FreeQuotaStatus {
+  freeUsed: number;         // free_quota_used en base
+  freeLimit: number;        // = FREE_LIMIT (3)
+  freeRemaining: number;    // freeLimit - freeUsed (min 0)
+  allowed: boolean;         // freeUsed < freeLimit
+}
+
+/**
+ * Lit free_quota_used depuis public.users.
+ * @throws Error si la requête Supabase échoue.
+ */
+export async function checkFreeQuota(userId: string): Promise<FreeQuotaStatus> {
+  const supabase = createServiceClient();
+
+  const { data, error } = await supabase
+    .from("users")
+    .select("free_quota_used")
+    .eq("id", userId)
+    .single();
+
+  if (error) {
+    throw new Error(`[quota] checkFreeQuota failed: ${error.message}`);
+  }
+
+  const freeUsed = data.free_quota_used ?? 0;
+  return {
+    freeUsed,
+    freeLimit: FREE_LIMIT,
+    freeRemaining: Math.max(0, FREE_LIMIT - freeUsed),
+    allowed: freeUsed < FREE_LIMIT,
+  };
+}
+
+/**
+ * Incrémente free_quota_used de +1.
+ * @throws Error si la mise à jour Supabase échoue.
+ */
+export async function incrementFreeQuota(userId: string): Promise<void> {
+  const supabase = createServiceClient();
+
+  const { data, error: readError } = await supabase
+    .from("users")
+    .select("free_quota_used")
+    .eq("id", userId)
+    .single();
+
+  if (readError) {
+    throw new Error(`[quota] incrementFreeQuota read failed: ${readError.message}`);
+  }
+
+  const { error: updateError } = await supabase
+    .from("users")
+    .update({ free_quota_used: (data.free_quota_used ?? 0) + 1 })
+    .eq("id", userId);
+
+  if (updateError) {
+    throw new Error(`[quota] incrementFreeQuota update failed: ${updateError.message}`);
   }
 }
 

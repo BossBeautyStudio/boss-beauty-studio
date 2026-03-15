@@ -3,16 +3,19 @@
 //
 // Exports principaux :
 //   MODEL_CONFIG        — modèle + maxTokens par module (cohérent avec claude.ts)
-//   Types output        — PlanningOutput, CarouselOutput, DMOutput, HooksOutput
-//   Types params        — PlanningParams, CarouselParams, DMParams, HooksParams
+//   Types output        — PlanningOutput, CarouselOutput, DMOutput, HooksOutput, PostOutput
+//   Types params        — PlanningParams, CarouselParams, DMParams, HooksParams, PostParams
+//   POST_TYPES          — catalogue des 7 types de posts avec exemples réels
 //   SYSTEM_PLANNING     — prompt système module planning 30 jours
 //   SYSTEM_CAROUSEL     — prompt système module carrousel
 //   SYSTEM_DM           — prompt système module réponse DM
 //   SYSTEM_HOOKS        — prompt système module hooks
+//   SYSTEM_POST         — prompt système module post unique (typePost)
 //   buildPlanningPrompt — builder → ClaudeCallParams pour callClaudeJSON
 //   buildCarouselPrompt — builder → ClaudeCallParams pour callClaudeJSON
 //   buildDMPrompt       — builder → ClaudeCallParams pour callClaudeJSON
 //   buildHooksPrompt    — builder → ClaudeCallParams pour callClaudeJSON
+//   buildPostPrompt     — builder → ClaudeCallParams pour callClaudeJSON
 // ============================================================
 
 import { MODEL } from "./claude";
@@ -41,6 +44,10 @@ export const MODEL_CONFIG = {
   hooks: {
     model: MODEL.haiku,
     maxTokens: 1400, // 10 hooks × 5 clés (~100 tokens/hook) + structure JSON
+  },
+  post: {
+    model: MODEL.haiku,
+    maxTokens: 600, // 1 post — hook + caption + hashtags + story + reel
   },
 } as const;
 
@@ -454,5 +461,181 @@ Génère les 10 hooks en JSON uniquement.`;
     system: SYSTEM_HOOKS,
     prompt,
     maxTokens: MODEL_CONFIG.hooks.maxTokens,
+  };
+}
+
+// ── Module Post Instagram — types, catalogue, prompt ──────────────────────────
+
+/**
+ * Sortie du module Post Instagram — un post unique adapté au typePost choisi.
+ */
+export interface PostOutput {
+  hook: string;              // accroche d'ouverture (1-2 phrases, standalone)
+  caption: string;           // caption complète prête à publier (hook inclus + corps + CTA)
+  hashtags: string[];        // 5 à 8 hashtags
+  ideeStory: string;         // idée de Story Instagram associée (1 phrase)
+  ideeReel: string | null;   // idée de Reel (1 phrase) ou null si non pertinent
+}
+
+/** Paramètres utilisateur du module Post Instagram */
+export interface PostParams {
+  typePost: string;       // libellé ou id du type (ex: "Attirer des clientes")
+  specialite: string;     // ex: "onglerie", "extensions de cils"
+  tonStyle: string;       // ex: "Chaleureux et proche"
+  contexte?: string;      // contexte supplémentaire optionnel (ex: "j'ai une promo cette semaine")
+}
+
+/**
+ * Catalogue des 5 types de posts.
+ * Chaque entrée contient un exemple réel affiché avant génération (Feature 2).
+ */
+export const POST_TYPES = [
+  {
+    id: "attirer",
+    label: "Attirer des clientes",
+    icon: "🎯",
+    description: "Post pour donner envie de prendre rendez-vous",
+    example: {
+      caption:
+        "Aujourd'hui j'ai travaillé sur un volume russe naturel ✨\n\nLe but était de garder un regard intense mais élégant.\n\nRésultat juste après la pose 👇\n\nQui préfère ce style ?\n\n📍 Réservation en DM",
+      hashtags: ["#extensionsdecils", "#lashartist", "#cilsbeaux", "#beauté", "#volumeRusse"],
+    },
+  },
+  {
+    id: "avant-apres",
+    label: "Avant / Après",
+    icon: "✨",
+    description: "Montre une transformation réelle avant et après",
+    example: {
+      caption:
+        "Voilà le résultat de ce matin 🤍\n\nMa cliente voulait un look plus naturel que ce qu'elle avait avant.\n\nOn a opté pour un effet cils naturels avec plus de volume sur les extrémités.\n\nTu aimes ce style ?\n\n📍 Réservation en DM",
+      hashtags: ["#avantaprès", "#extensionsdecils", "#lashtech", "#transformation", "#cilsparfaits"],
+    },
+  },
+  {
+    id: "promo",
+    label: "Promotion / Offre",
+    icon: "🏷️",
+    description: "Annonce une offre ou un créneau disponible",
+    example: {
+      caption:
+        "Il reste 2 créneaux cette semaine 🗓️\n\nSi tu penses depuis un moment à essayer le lash lift, c'est le bon moment.\n\nRésultat naturel, courbe parfaite, ça tient 6 à 8 semaines.\n\nEnvoie-moi 'LIFT' en DM pour réserver 📩",
+      hashtags: ["#lashlift", "#disponibilités", "#cilscourbés", "#beauté", "#réservation"],
+    },
+  },
+  {
+    id: "conseil",
+    label: "Conseil beauté",
+    icon: "💡",
+    description: "Partage une astuce utile pour tes clientes",
+    example: {
+      caption:
+        "Un truc que je dis à presque toutes mes clientes lors de la pose 👇\n\nÉvite le démaquillant huileux près de tes cils.\n\nL'huile dissout la colle des extensions et tes cils tombent beaucoup plus vite.\n\nCe que j'utilise :\n→ démaquillant sans huile\n→ brosse douce pour appliquer\n→ on tamponne, on ne frotte pas\n\nSauvegarde pour t'en souvenir 💾",
+      hashtags: ["#conseilcils", "#extensionsdecils", "#lashcare", "#entretienCils", "#astucesbeauté"],
+    },
+  },
+  {
+    id: "reponse-dm",
+    label: "Répondre à une cliente",
+    icon: "💬",
+    description: "Réponds à une question que tu reçois souvent",
+    example: {
+      caption:
+        "La question que je reçois presque tous les jours :\n\n'Combien de temps ça dure les extensions ?'\n\nEntre 3 et 6 semaines selon comment tu t'en occupes.\n\nCe qui change tout :\n→ dormir sur le dos\n→ éviter la vapeur et le sauna\n→ brosser tes cils le matin\n\nSi tu fais ces 3 choses, elles tiennent facilement 5 semaines.\n\nD'autres questions ? Envoie-moi un DM 📩",
+      hashtags: ["#faq", "#extensionsdecils", "#durabilité", "#conseilcils", "#lashtech"],
+    },
+  },
+] as const;
+
+/** Type dérivé du catalogue — utile pour typer le paramètre côté UI */
+export type PostTypeId = (typeof POST_TYPES)[number]["id"];
+
+/**
+ * Prompt système — Module Post Instagram (un post unique, type adaptatif).
+ */
+export const SYSTEM_POST = `Tu es une professionnelle de la beauté indépendante qui crée ses propres posts Instagram. Tu écris comme tu parles — de manière simple, directe et naturelle.
+
+Ta mission : écrire UN seul post Instagram pour une professionnelle de la beauté (coiffure, esthétique, onglerie, maquillage, extensions de cils, soins).
+
+Règles de ton et de style :
+- Écris comme si tu racontais à une amie ce que tu as fait aujourd'hui. Pas de jargon marketing.
+- Phrases courtes. Sauts de ligne réguliers. Facile à lire sur mobile.
+- La première phrase (hook) est simple mais donne envie de lire la suite — une question, une observation, un fait concret.
+- Le texte complet inclut la première phrase + le corps du post + une invitation naturelle à réserver ou à répondre. Maximum 200 mots. 1 à 3 émojis max, placés naturellement.
+- INTERDIT : formules creuses du type "sublimez votre regard", "expertise incomparable", "résultats exceptionnels". Tout doit sonner vrai.
+- Tout le contenu doit parler de la spécialité indiquée — rien de générique.
+- Les hashtags : entre 5 et 8, mélange populaires et de niche, cohérents avec la spécialité et le type de post.
+- ideeStory : une idée simple de Story Instagram liée au post (1 phrase).
+- ideeReel : une idée de Reel si le sujet s'y prête (1 phrase), null sinon.
+
+Contraintes de structure absolues :
+- Le JSON doit contenir EXACTEMENT ces 5 clés : hook, caption, hashtags, ideeStory, ideeReel.
+- hashtags est un tableau de 5 à 8 chaînes.
+- ideeReel vaut null (valeur JSON null) si aucune idée Reel pertinente.
+- Aucune autre clé ne doit être ajoutée.
+- Ta réponse doit être UNIQUEMENT du JSON valide, sans texte avant, sans texte après, sans bloc markdown.`;
+
+/**
+ * Construit les paramètres pour l'appel Claude — Module Post Instagram.
+ */
+export function buildPostPrompt(params: PostParams): ClaudeCallParams {
+  const contexteInfo = params.contexte
+    ? `\n- Contexte supplémentaire : ${params.contexte}`
+    : "";
+
+  // Instructions spécifiques par typePost
+  const typeInstructions: Record<string, string> = {
+    attirer:
+      "Ce post montre un résultat ou raconte une prestation d'aujourd'hui pour donner envie de prendre rendez-vous. Ton naturel, comme si tu décrivais ta journée. Se termine par une invitation simple à écrire en DM pour réserver.",
+    "avant-apres":
+      "Ce post décrit une transformation réelle. Raconte ce que la cliente voulait, ce qui a été fait, le résultat obtenu. Ton enthousiaste mais simple. Pose une question aux abonnées (elles préfèrent quel style ?) et invite à écrire en DM.",
+    promo:
+      "Ce post annonce un créneau disponible ou une offre. L'urgence est naturelle et honnête (2 créneaux, jusqu'à vendredi). Se termine par un mot-clé à envoyer en DM pour réserver.",
+    conseil:
+      "Ce post partage une astuce concrète liée à la spécialité — une erreur fréquente, un geste utile, un conseil que tu donnes souvent à tes clientes. Langage simple, étapes courtes. Se termine par 'Sauvegarde pour t'en souvenir 💾'.",
+    "reponse-dm":
+      "Ce post répond à une question fréquente reçue en messages privés. Commence par décrire la question, puis réponds directement et honnêtement. Se termine par une invitation à poser d'autres questions en DM.",
+  };
+
+  const typeKey = POST_TYPES.find((t) => t.label === params.typePost || t.id === params.typePost)?.id ?? "";
+  const typeInstruction = typeInstructions[typeKey] ?? `Ce post est de type "${params.typePost}". Adapte le contenu en conséquence.`;
+
+  const prompt = `Génère UN post Instagram pour une professionnelle de la beauté.
+
+Profil :
+- Spécialité : ${params.specialite}
+- Type de post : ${params.typePost}
+- Style de communication : ${params.tonStyle}${contexteInfo}
+
+Instructions pour ce type de post :
+${typeInstruction}
+
+Instructions générales :
+- Le hook est court et percutant (1-2 phrases).
+- La caption est prête à copier-coller, ancrée dans la spécialité "${params.specialite}".
+- Tous les éléments doivent parler de "${params.specialite}" — aucun contenu générique.
+
+Structure JSON attendue — EXACTEMENT ces clés, aucune autre :
+{
+  "hook": "première phrase du post (1-2 phrases, naturelle et directe)",
+  "caption": "texte complet du post (première phrase + corps + invitation à réserver ou répondre, émojis sobres)",
+  "hashtags": ["#hashtag1", "#hashtag2", "#hashtag3", "#hashtag4", "#hashtag5"],
+  "ideeStory": "idée de Story Instagram liée au post (1 phrase simple)",
+  "ideeReel": "idée de Reel (1 phrase) ou null"
+}
+
+Contraintes strictes :
+- EXACTEMENT 5 clés : hook, caption, hashtags, ideeStory, ideeReel.
+- hashtags : entre 5 et 8 éléments.
+- ideeReel : valeur null si non pertinent.
+- Aucune clé supplémentaire.
+
+Génère le post en JSON uniquement.`;
+
+  return {
+    model: MODEL_CONFIG.post.model,
+    system: SYSTEM_POST,
+    prompt,
+    maxTokens: MODEL_CONFIG.post.maxTokens,
   };
 }

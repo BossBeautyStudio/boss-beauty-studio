@@ -143,7 +143,7 @@ export default function HooksPage() {
       {/* En-tête */}
       <div className="mb-8">
         <h1 className="mb-1 text-2xl font-semibold" style={{ color: "var(--text)" }}>
-          Hooks Instagram
+          Accroches Instagram
         </h1>
         <p className="text-sm" style={{ color: "var(--text-muted)" }}>
           La première phrase décide si ton post est lu ou scrollé.
@@ -162,12 +162,12 @@ export default function HooksPage() {
             }}
           >
             <p className="mb-2 text-sm font-semibold" style={{ color: "var(--text)" }}>
-              ⚡ C&apos;est quoi un hook ?
+              ⚡ C&apos;est quoi une accroche ?
             </p>
             <p className="mb-3 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
-              Un hook, c&apos;est la toute première phrase de ton post Instagram. C&apos;est elle
+              Une accroche, c&apos;est la toute première phrase de ton post Instagram. C&apos;est elle
               qui décide si une personne s&apos;arrête pour lire — ou continue à scroller. Sur
-              Instagram, tu as moins de 2 secondes pour capter l&apos;attention. Un bon hook peut
+              Instagram, tu as moins de 2 secondes pour capter l&apos;attention. Une bonne accroche peut
               multiplier par 3 ou 4 le nombre de personnes qui lisent vraiment ton contenu.
             </p>
             <div
@@ -175,11 +175,11 @@ export default function HooksPage() {
               style={{ backgroundColor: "var(--surface)", border: "1px solid var(--border)" }}
             >
               <p className="mb-1 text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
-                Comment utiliser tes hooks
+                Comment utiliser tes accroches
               </p>
               <ol className="flex flex-col gap-1">
                 {[
-                  "Colle le hook choisi tout en haut de ta caption",
+                  "Colle l'accroche choisie tout en haut de ton texte de post",
                   "Complète avec ton contenu habituel",
                   "Termine par un appel à l'action vers tes DM ou ton agenda",
                 ].map((step, i) => (
@@ -196,7 +196,7 @@ export default function HooksPage() {
               </ol>
             </div>
             <p className="text-xs font-medium" style={{ color: "var(--accent)" }}>
-              Nouveau → chaque hook inclut maintenant : pourquoi ça marche, comment l&apos;utiliser,
+              Nouveau → chaque accroche inclut maintenant : pourquoi ça marche, comment l&apos;utiliser,
               et une idée Reel associée.
             </p>
           </div>
@@ -290,7 +290,7 @@ export default function HooksPage() {
                 className="btn btn-primary"
                 disabled={loading}
               >
-                {loading ? "Génération de tes 10 hooks… ✨" : "Générer mes 10 hooks →"}
+                {loading ? "Génération de tes 10 accroches… ✨" : "Générer mes 10 accroches →"}
               </button>
 
               {!loading && (
@@ -308,13 +308,13 @@ export default function HooksPage() {
         <div className="slide-up">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-lg font-semibold" style={{ color: "var(--text)" }}>
-              Tes 10 hooks Instagram
+              Tes 10 accroches Instagram
             </h2>
             <button
               className="btn btn-secondary"
               onClick={() => setResult(null)}
             >
-              Nouveaux hooks
+              Nouvelles accroches
             </button>
           </div>
 

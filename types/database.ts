@@ -5,7 +5,7 @@
 
 export type SubscriptionStatus = "active" | "inactive" | "trial" | "cancelled";
 export type UserPlan = "starter" | "pro";
-export type GenerationType = "planning" | "carousel" | "dm" | "hooks";
+export type GenerationType = "planning" | "carousel" | "dm" | "hooks" | "post";
 
 // Table: public.users
 export interface DbUser {

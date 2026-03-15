@@ -23,7 +23,7 @@ import { createServiceClient } from "./supabase/server";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type GenerationType = "planning" | "carousel" | "dm" | "hooks";
+export type GenerationType = "planning" | "carousel" | "dm" | "hooks" | "post";
 
 export interface SaveGenerationParams {
   userId: string;
@@ -48,6 +48,14 @@ export interface SaveGenerationParams {
 export async function saveGeneration(
   params: SaveGenerationParams
 ): Promise<void> {
+  // Log de diagnostic — confirme le payload exact envoyé à Supabase
+  console.log("[db] saveGeneration called:", {
+    userId:     params.userId,
+    type:       params.type,        // doit être exactement "post", "planning", etc.
+    tokensUsed: params.tokensUsed,
+    inputKeys:  Object.keys(params.inputs),
+  });
+
   try {
     const supabase = createServiceClient();
 
@@ -61,7 +69,15 @@ export async function saveGeneration(
     });
 
     if (error) {
-      console.error("[db] saveGeneration failed:", error.message);
+      // Log complet : code PostgreSQL (23514 = check_violation), details, hint
+      console.error("[db] saveGeneration failed:", {
+        message: error.message,
+        code:    error.code,    // "23514" si contrainte CHECK rejetée
+        details: error.details,
+        hint:    error.hint,
+      });
+    } else {
+      console.log("[db] saveGeneration success — type:", params.type);
     }
   } catch (err) {
     console.error("[db] saveGeneration unexpected error:", err);

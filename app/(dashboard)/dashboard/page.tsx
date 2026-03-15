@@ -11,6 +11,29 @@ import { checkQuota } from "@/lib/quota";
 
 const MODULES = [
   {
+    href: "/dashboard/post",
+    title: "Post Instagram",
+    description:
+      "Choisis un type de contenu (attirer des clientes, avant/après, conseil, promo…) et génère un post complet en 10 secondes.",
+    badge: "7 types · ~10 sec",
+    cta: "Créer un post",
+    icon: (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="3" y="3" width="18" height="18" rx="3" />
+        <path d="M8 12h8M12 8v8" />
+      </svg>
+    ),
+  },
+  {
     href: "/dashboard/planning",
     title: "Planning Instagram",
     description:

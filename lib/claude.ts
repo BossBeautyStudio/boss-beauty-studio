@@ -60,17 +60,23 @@ const BASE_DELAY_MS = 1000;
 
 // ── Client Anthropic ──────────────────────────────────────────────────────────
 
-// Vérification explicite avant instanciation — fail fast au démarrage
-if (!process.env.ANTHROPIC_API_KEY) {
-  throw new Error(
-    "[claude] ANTHROPIC_API_KEY is not defined. Add it to .env.local."
-  );
-}
+// Initialisation lazy — le client n'est créé qu'au premier appel API.
+// Évite un crash au chargement du module si ANTHROPIC_API_KEY est absent
+// (ex : environnement de développement sans clé configurée).
+// L'erreur est levée dans callClaude et interceptée par le handler de route.
+let _anthropic: Anthropic | null = null;
 
-// Singleton — une seule instance pour toute l'application
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+function getClient(): Anthropic {
+  if (!_anthropic) {
+    if (!process.env.ANTHROPIC_API_KEY) {
+      throw new Error(
+        "Le générateur est momentanément indisponible. Réessaie dans quelques secondes."
+      );
+    }
+    _anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  }
+  return _anthropic;
+}
 
 // ── safeParseJSON ─────────────────────────────────────────────────────────────
 
@@ -136,7 +142,7 @@ export async function callClaude(
 
   for (let attempt = 1; attempt <= API_MAX_RETRIES; attempt++) {
     try {
-      const response = await anthropic.messages.create({
+      const response = await getClient().messages.create({
         model: params.model,
         max_tokens: params.maxTokens,
         system: params.system,

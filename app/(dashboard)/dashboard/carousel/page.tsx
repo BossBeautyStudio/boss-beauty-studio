@@ -412,7 +412,7 @@ export default function CarouselPage() {
           <div className="card mb-4">
             <div className="mb-2 flex items-center justify-between gap-4">
               <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
-                Caption de publication
+                Texte de publication
               </p>
               <button
                 className="btn btn-secondary shrink-0"
@@ -449,7 +449,7 @@ export default function CarouselPage() {
               style={{ backgroundColor: "var(--surface-alt)" }}
             >
               <p className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
-                CTA
+                Invitation à réserver
               </p>
               <p className="text-sm font-medium" style={{ color: "var(--text)" }}>
                 {result.cta}

@@ -11,7 +11,7 @@ import { useEffect, useState, useCallback } from "react";
 
 // ── Types ─────────────────────────────────────────────────────
 
-type GenerationType = "planning" | "carousel" | "dm" | "hooks";
+type GenerationType = "planning" | "carousel" | "dm" | "hooks" | "post";
 
 interface Generation {
   id: string;
@@ -28,7 +28,8 @@ const TYPE_LABELS: Record<GenerationType, string> = {
   planning: "Planning",
   carousel: "Carrousel",
   dm: "Réponse DM",
-  hooks: "Hooks Instagram",
+  hooks: "Accroches Instagram",
+  post: "Post Instagram",
 };
 
 const TYPE_ICONS: Record<GenerationType, string> = {
@@ -36,6 +37,23 @@ const TYPE_ICONS: Record<GenerationType, string> = {
   carousel: "🖼️",
   dm: "💬",
   hooks: "⚡",
+  post: "📸",
+};
+
+// Traduction des clés techniques en labels lisibles pour toutes les générations
+const INPUT_KEY_LABELS: Record<string, string> = {
+  typePost: "Type de post",
+  specialite: "Spécialité",
+  tonStyle: "Style de communication",
+  contexte: "Contexte",
+  objectif: "Objectif",
+  dateDebut: "Début du planning",
+  ville: "Ville",
+  sujet: "Sujet",
+  nombreSlides: "Nombre de slides",
+  publicCible: "Public cible",
+  messageClient: "Message reçu",
+  typeContenu: "Type de contenu",
 };
 
 function formatDate(iso: string): string {
@@ -357,8 +375,8 @@ function InputsView({ inputs }: { inputs: Record<string, unknown> }) {
     <dl className="flex flex-col gap-1">
       {entries.map(([key, value]) => (
         <div key={key} style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-          <dt className="text-xs font-semibold" style={{ color: "var(--text-muted)", minWidth: "8rem" }}>
-            {key}
+          <dt className="text-xs font-semibold" style={{ color: "var(--text-muted)", minWidth: "9rem" }}>
+            {INPUT_KEY_LABELS[key] ?? key}
           </dt>
           <dd className="text-xs" style={{ color: "var(--text)", flex: 1 }}>
             {typeof value === "object" ? JSON.stringify(value) : String(value)}
@@ -476,6 +494,93 @@ function OutputView({ type, output }: { type: GenerationType; output: unknown })
           <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
             + {o.slides.length - 4} autres slides
           </p>
+        )}
+      </div>
+    );
+  }
+
+  if (type === "post") {
+    const o = output as {
+      hook?: string;
+      caption?: string;
+      hashtags?: string[];
+      ideeStory?: string;
+      ideeReel?: string | null;
+    };
+    return (
+      <div className="flex flex-col gap-3">
+        {/* Première phrase */}
+        {o.hook && (
+          <div>
+            <p
+              className="text-xs font-semibold mb-1"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Première phrase
+            </p>
+            <p
+              className="text-sm font-medium"
+              style={{
+                backgroundColor: "var(--surface-alt)",
+                borderRadius: "var(--radius)",
+                padding: "0.6rem 0.875rem",
+                color: "var(--text)",
+              }}
+            >
+              {o.hook}
+            </p>
+          </div>
+        )}
+
+        {/* Texte du post */}
+        {o.caption && (
+          <div>
+            <p
+              className="text-xs font-semibold mb-1"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Texte du post
+            </p>
+            <p
+              className="text-sm leading-relaxed"
+              style={{
+                backgroundColor: "var(--surface-alt)",
+                borderRadius: "var(--radius)",
+                padding: "0.75rem 0.875rem",
+                color: "var(--text)",
+                whiteSpace: "pre-line",
+              }}
+            >
+              {o.caption}
+            </p>
+          </div>
+        )}
+
+        {/* Hashtags */}
+        {Array.isArray(o?.hashtags) && o.hashtags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {o.hashtags.map((tag) => (
+              <span key={tag} className="badge">{tag}</span>
+            ))}
+          </div>
+        )}
+
+        {/* Idée Story */}
+        {o.ideeStory && (
+          <div
+            className="rounded-[10px] px-3 py-2"
+            style={{
+              backgroundColor: "var(--bg)",
+              borderLeft: "3px solid #6b9fd4",
+            }}
+          >
+            <p className="text-xs font-semibold mb-0.5" style={{ color: "#6b9fd4" }}>
+              📸 Idée Story
+            </p>
+            <p className="text-xs" style={{ color: "var(--text)" }}>
+              {o.ideeStory}
+            </p>
+          </div>
         )}
       </div>
     );

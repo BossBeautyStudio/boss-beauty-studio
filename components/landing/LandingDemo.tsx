@@ -216,7 +216,7 @@ export default function LandingDemo({ checkoutUrl }: Props) {
                 className="mb-2 text-xs font-semibold uppercase tracking-wider"
                 style={{ color: "var(--text-muted)" }}
               >
-                Caption
+                Texte du post
               </p>
               <p
                 className="whitespace-pre-line text-sm leading-relaxed"
