@@ -97,26 +97,6 @@ export default function LandingPage() {
     <div className="pb-[72px] lg:pb-0" style={{ backgroundColor: "var(--bg)", minHeight: "100dvh" }}>
 
       {/* ══════════════════════════════════════════════════════
-          RESPONSIVE IMAGE POSITIONS — mobile uniquement
-          Inline styles ont priorité 1000 → !important requis.
-          Desktop (lg = 1024px+) : valeurs inchangées.
-          Mobile : objectPosition abaissé pour montrer
-                   visage + téléphone dans la main.
-      ══════════════════════════════════════════════════════ */}
-      <style>{`
-        @media (max-width: 1023px) {
-          /* Hero — téléphone visible en abaissant la fenêtre */
-          #img-hero img      { object-position: center 38% !important; }
-          /* Problème — montre épaules + téléphone */
-          #img-probleme img  { object-position: center 48% !important; }
-          /* Solution — recadrage plus bas pour téléphone */
-          #img-solution img  { object-position: center 40% !important; }
-          /* Résultat — notifications téléphone bien centré */
-          #img-resultat img  { object-position: center 44% !important; }
-        }
-      `}</style>
-
-      {/* ══════════════════════════════════════════════════════
           NAV
       ══════════════════════════════════════════════════════ */}
       <nav
@@ -277,8 +257,8 @@ export default function LandingPage() {
           {/* ── Colonne image (42%) ── */}
           <div
             id="img-hero"
-            className="relative w-full min-h-[260px] lg:min-h-[380px] lg:w-auto"
-            style={{ flex: "0 0 42%", overflow: "hidden" }}
+            className="relative w-full h-[240px] md:h-[420px] lg:h-auto lg:min-h-[380px] lg:w-auto overflow-hidden"
+            style={{ flex: "0 0 42%" }}
           >
             <Image
               src="/images/hero-estheticienne.jpg"
@@ -286,12 +266,7 @@ export default function LandingPage() {
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 42vw"
-              style={{
-                objectFit: "cover",
-                objectPosition: "center 18%",
-                transform: "scale(1.08)",
-                transformOrigin: "center 22%",
-              }}
+              className="object-cover object-center scale-[0.9] md:scale-100"
             />
             {/* Fondu gauche sur desktop */}
             <div
@@ -322,7 +297,7 @@ export default function LandingPage() {
         >
           {/* ── Colonne texte (55%) ── */}
           <div
-            className="flex flex-col justify-center px-6 py-10 lg:py-20 lg:pl-16"
+            className="flex flex-col justify-center px-6 py-10 lg:py-20 lg:pl-16 max-w-[520px] mx-auto lg:max-w-none lg:mx-0"
             style={{ flex: "0 0 55%" }}
           >
             <p
@@ -355,19 +330,15 @@ export default function LandingPage() {
           {/* ── Colonne image (45%) — zoom réduit ── */}
           <div
             id="img-probleme"
-            className="relative w-full min-h-[240px] lg:min-h-[360px] lg:w-auto"
-            style={{ flex: "0 0 45%", overflow: "hidden" }}
+            className="relative w-full h-[240px] md:h-[420px] lg:h-auto lg:min-h-[360px] lg:w-auto overflow-hidden"
+            style={{ flex: "0 0 45%" }}
           >
             <Image
               src="/images/probleme-estheticienne.jpg"
               alt="Esthéticienne face au problème de contenu Instagram"
               fill
               sizes="(max-width: 1024px) 100vw, 45vw"
-              style={{
-                objectFit: "cover",
-                objectPosition: "center 35%",
-                /* Pas de transform scale — on veut voir les épaules et le décor */
-              }}
+              className="object-cover object-center scale-[0.9] md:scale-100"
             />
             <div
               className="absolute inset-y-0 right-0 hidden lg:block"
@@ -391,7 +362,7 @@ export default function LandingPage() {
         >
           {/* ── Colonne texte (55%) ── */}
           <div
-            className="flex flex-col justify-center px-6 py-10 lg:py-20 lg:pr-16"
+            className="flex flex-col justify-center px-6 py-10 lg:py-20 lg:pr-16 max-w-[520px] mx-auto lg:max-w-none lg:mx-0"
             style={{ flex: "0 0 55%" }}
           >
             <p
@@ -424,20 +395,15 @@ export default function LandingPage() {
           {/* ── Colonne image (45%) ── */}
           <div
             id="img-solution"
-            className="relative w-full min-h-[240px] lg:min-h-[360px] lg:w-auto"
-            style={{ flex: "0 0 45%", overflow: "hidden" }}
+            className="relative w-full h-[240px] md:h-[420px] lg:h-auto lg:min-h-[360px] lg:w-auto overflow-hidden"
+            style={{ flex: "0 0 45%" }}
           >
             <Image
               src="/images/solution-estheticienne.jpg"
               alt="Esthéticienne satisfaite avec son contenu généré"
               fill
               sizes="(max-width: 1024px) 100vw, 45vw"
-              style={{
-                objectFit: "cover",
-                objectPosition: "center 20%",
-                transform: "scale(1.08)",
-                transformOrigin: "center 24%",
-              }}
+              className="object-cover object-center scale-[0.9] md:scale-100"
             />
             <div
               className="absolute inset-y-0 left-0 hidden lg:block"
@@ -465,7 +431,7 @@ export default function LandingPage() {
         >
           {/* ── Colonne texte + DM (55%) ── */}
           <div
-            className="flex flex-col justify-center px-6 py-10 lg:py-20 lg:pl-16"
+            className="flex flex-col justify-center px-6 py-10 lg:py-20 lg:pl-16 max-w-[520px] mx-auto lg:max-w-none lg:mx-0"
             style={{ flex: "0 0 55%" }}
           >
             <p
@@ -527,18 +493,15 @@ export default function LandingPage() {
           {/* ── Colonne image (45%) ── */}
           <div
             id="img-resultat"
-            className="relative w-full min-h-[240px] lg:min-h-[360px] lg:w-auto"
-            style={{ flex: "0 0 45%", overflow: "hidden" }}
+            className="relative w-full h-[240px] md:h-[420px] lg:h-auto lg:min-h-[360px] lg:w-auto overflow-hidden"
+            style={{ flex: "0 0 45%" }}
           >
             <Image
               src="/images/notification-client.jpg"
               alt="Notification de réservation cliente"
               fill
               sizes="(max-width: 1024px) 100vw, 45vw"
-              style={{
-                objectFit: "cover",
-                objectPosition: "center center",
-              }}
+              className="object-cover object-center scale-[0.9] md:scale-100"
             />
             <div
               className="absolute inset-y-0 right-0 hidden lg:block"
@@ -598,7 +561,7 @@ export default function LandingPage() {
         >
           {/* ── Colonne texte (42%) ── */}
           <div
-            className="flex flex-col justify-center px-6 py-10 lg:py-20 lg:pr-14"
+            className="flex flex-col justify-center px-6 py-10 lg:py-20 lg:pr-14 max-w-[520px] mx-auto lg:max-w-none lg:mx-0"
             style={{ flex: "0 0 42%" }}
           >
             <p
@@ -653,18 +616,15 @@ export default function LandingPage() {
 
           {/* ── Colonne image dashboard (58%) ── */}
           <div
-            className="relative w-full min-h-[200px] lg:min-h-[360px] lg:w-auto"
-            style={{ flex: "0 0 58%", overflow: "hidden" }}
+            className="relative w-full h-[240px] md:h-[420px] lg:h-auto lg:min-h-[360px] lg:w-auto overflow-hidden"
+            style={{ flex: "0 0 58%" }}
           >
             <Image
               src="/images/dashboard-saas.jpg"
               alt="Dashboard Boss Beauty Studio"
               fill
               sizes="(max-width: 1024px) 100vw, 58vw"
-              style={{
-                objectFit: "cover",
-                objectPosition: "center center",
-              }}
+              className="object-contain md:object-cover scale-[0.85] md:scale-100"
             />
             <div
               className="absolute inset-y-0 left-0 hidden lg:block"
