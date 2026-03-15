@@ -100,7 +100,7 @@ export default function LandingDemoInteractive() {
   return (
     <section
       id="demo"
-      className="px-5 py-20"
+      className="px-5 py-12 sm:py-20"
       style={{ borderBottom: "1px solid var(--border)" }}
     >
       <div className="mx-auto" style={{ maxWidth: "680px" }}>
@@ -119,7 +119,7 @@ export default function LandingDemoInteractive() {
           <span style={{ color: "var(--accent)" }}>gratuitement</span>
         </h2>
         <p
-          className="mb-10 text-center text-sm"
+          className="mb-6 sm:mb-10 text-center text-sm"
           style={{ color: "var(--text-muted)" }}
         >
           Choisis ta spécialité et le type de contenu. Le résultat apparaît en 10 secondes.

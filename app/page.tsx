@@ -94,7 +94,7 @@ const FAQ_ITEMS = [
 
 export default function LandingPage() {
   return (
-    <div style={{ backgroundColor: "var(--bg)", minHeight: "100dvh" }}>
+    <div className="pb-[72px] lg:pb-0" style={{ backgroundColor: "var(--bg)", minHeight: "100dvh" }}>
 
       {/* ══════════════════════════════════════════════════════
           NAV
@@ -123,7 +123,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-3">
             <Link
               href="/login"
-              className="btn btn-ghost"
+              className="btn btn-ghost hidden sm:inline-flex"
               style={{ fontSize: "0.875rem", padding: "0.45rem 1rem" }}
             >
               Se connecter
@@ -154,12 +154,12 @@ export default function LandingPage() {
         >
           {/* ── Colonne texte (58%) ── */}
           <div
-            className="flex flex-col justify-center px-6 py-16 lg:py-20 lg:pr-16"
+            className="flex flex-col justify-center px-6 py-10 lg:py-20 lg:pr-16"
             style={{ flex: "0 0 58%" }}
           >
             {/* Badge niche */}
             <div
-              className="mb-6 inline-flex w-fit items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold"
+              className="mb-5 inline-flex w-fit items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold"
               style={{
                 backgroundColor: "var(--surface-alt)",
                 border: "1px solid var(--border)",
@@ -171,7 +171,7 @@ export default function LandingPage() {
 
             {/* H1 */}
             <h1
-              className="mb-5 text-4xl font-semibold leading-tight sm:text-5xl"
+              className="mb-4 text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl"
               style={{ color: "var(--text)" }}
             >
               Transforme ton Instagram
@@ -182,7 +182,7 @@ export default function LandingPage() {
             </h1>
 
             <p
-              className="mb-8 max-w-[420px] text-lg leading-relaxed"
+              className="mb-7 max-w-[420px] text-base leading-relaxed lg:text-lg"
               style={{ color: "var(--text-muted)" }}
             >
               Boss Beauty Studio génère tes posts Instagram et t&apos;aide
@@ -193,8 +193,8 @@ export default function LandingPage() {
             <div>
               <a
                 href={CHECKOUT_URL}
-                className="btn btn-primary"
-                style={{ fontSize: "1rem", padding: "0.8rem 1.75rem" }}
+                className="btn btn-primary w-full sm:w-auto"
+                style={{ fontSize: "1rem", padding: "0.8rem 1.75rem", display: "flex", justifyContent: "center" }}
               >
                 Commencer maintenant →
               </a>
@@ -256,8 +256,8 @@ export default function LandingPage() {
 
           {/* ── Colonne image (42%) ── */}
           <div
-            className="relative w-full lg:w-auto"
-            style={{ flex: "0 0 42%", minHeight: "380px", overflow: "hidden" }}
+            className="relative w-full min-h-[220px] lg:min-h-[380px] lg:w-auto"
+            style={{ flex: "0 0 42%", overflow: "hidden" }}
           >
             <Image
               src="/images/hero-estheticienne.jpg"
@@ -301,7 +301,7 @@ export default function LandingPage() {
         >
           {/* ── Colonne texte (55%) ── */}
           <div
-            className="flex flex-col justify-center px-6 py-16 lg:py-20 lg:pl-16"
+            className="flex flex-col justify-center px-6 py-10 lg:py-20 lg:pl-16"
             style={{ flex: "0 0 55%" }}
           >
             <p
@@ -333,8 +333,8 @@ export default function LandingPage() {
 
           {/* ── Colonne image (45%) — zoom réduit ── */}
           <div
-            className="relative w-full lg:w-auto"
-            style={{ flex: "0 0 45%", minHeight: "360px", overflow: "hidden" }}
+            className="relative w-full min-h-[200px] lg:min-h-[360px] lg:w-auto"
+            style={{ flex: "0 0 45%", overflow: "hidden" }}
           >
             <Image
               src="/images/probleme-estheticienne.jpg"
@@ -369,7 +369,7 @@ export default function LandingPage() {
         >
           {/* ── Colonne texte (55%) ── */}
           <div
-            className="flex flex-col justify-center px-6 py-16 lg:py-20 lg:pr-16"
+            className="flex flex-col justify-center px-6 py-10 lg:py-20 lg:pr-16"
             style={{ flex: "0 0 55%" }}
           >
             <p
@@ -392,17 +392,17 @@ export default function LandingPage() {
               className="max-w-[400px] text-base leading-relaxed"
               style={{ color: "var(--text-muted)" }}
             >
-              Boss Beauty Studio génère des idées de contenu, des captions
-              et des hooks optimisés pour attirer des clientes. Tu indiques
-              ta spécialité, tu génères en un clic — le contenu est adapté
-              à ton univers, prêt à publier immédiatement.
+              Boss Beauty Studio génère des idées de contenu, des textes de
+              posts et des accroches optimisés pour attirer des clientes.
+              Tu indiques ta spécialité, tu génères en un clic — le contenu
+              est adapté à ton univers, prêt à publier immédiatement.
             </p>
           </div>
 
           {/* ── Colonne image (45%) ── */}
           <div
-            className="relative w-full lg:w-auto"
-            style={{ flex: "0 0 45%", minHeight: "360px", overflow: "hidden" }}
+            className="relative w-full min-h-[200px] lg:min-h-[360px] lg:w-auto"
+            style={{ flex: "0 0 45%", overflow: "hidden" }}
           >
             <Image
               src="/images/solution-estheticienne.jpg"
@@ -442,7 +442,7 @@ export default function LandingPage() {
         >
           {/* ── Colonne texte + DM (55%) ── */}
           <div
-            className="flex flex-col justify-center px-6 py-16 lg:py-20 lg:pl-16"
+            className="flex flex-col justify-center px-6 py-10 lg:py-20 lg:pl-16"
             style={{ flex: "0 0 55%" }}
           >
             <p
@@ -503,8 +503,8 @@ export default function LandingPage() {
 
           {/* ── Colonne image (45%) ── */}
           <div
-            className="relative w-full lg:w-auto"
-            style={{ flex: "0 0 45%", minHeight: "360px", overflow: "hidden" }}
+            className="relative w-full min-h-[200px] lg:min-h-[360px] lg:w-auto"
+            style={{ flex: "0 0 45%", overflow: "hidden" }}
           >
             <Image
               src="/images/notification-client.jpg"
@@ -528,6 +528,31 @@ export default function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════
+          CTA INTERMÉDIAIRE — mobile uniquement (après Résultat)
+      ══════════════════════════════════════════════════════ */}
+      <div
+        className="px-5 py-7 lg:hidden"
+        style={{ borderBottom: "1px solid var(--border)" }}
+      >
+        <a
+          href={CHECKOUT_URL}
+          className="btn btn-primary"
+          style={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            fontSize: "1rem",
+            padding: "0.8rem 1.5rem",
+          }}
+        >
+          Commencer maintenant →
+        </a>
+        <p className="mt-2 text-center text-xs" style={{ color: "var(--text-muted)" }}>
+          Résultats en 15 secondes · Annulation en 1 clic
+        </p>
+      </div>
+
+      {/* ══════════════════════════════════════════════════════
           5 — DÉMO INTERACTIVE (Feature 4 / V1.2)
           Composant client — génère un post en temps réel
           via /api/generate/demo (public, mock data)
@@ -549,7 +574,7 @@ export default function LandingPage() {
         >
           {/* ── Colonne texte (42%) ── */}
           <div
-            className="flex flex-col justify-center px-6 py-16 lg:py-20 lg:pr-14"
+            className="flex flex-col justify-center px-6 py-10 lg:py-20 lg:pr-14"
             style={{ flex: "0 0 42%" }}
           >
             <p
@@ -595,8 +620,8 @@ export default function LandingPage() {
 
             <a
               href={CHECKOUT_URL}
-              className="btn btn-primary mt-8 w-fit"
-              style={{ fontSize: "0.9375rem", padding: "0.75rem 1.5rem" }}
+              className="btn btn-primary mt-8 w-full sm:w-fit"
+              style={{ fontSize: "0.9375rem", padding: "0.75rem 1.5rem", display: "flex", justifyContent: "center" }}
             >
               Essayer maintenant →
             </a>
@@ -604,8 +629,8 @@ export default function LandingPage() {
 
           {/* ── Colonne image dashboard (58%) ── */}
           <div
-            className="relative w-full lg:w-auto"
-            style={{ flex: "0 0 58%", minHeight: "360px", overflow: "hidden" }}
+            className="relative w-full min-h-[200px] lg:min-h-[360px] lg:w-auto"
+            style={{ flex: "0 0 58%", overflow: "hidden" }}
           >
             <Image
               src="/images/dashboard-saas.jpg"
@@ -632,7 +657,7 @@ export default function LandingPage() {
           7 — AVIS CLIENTS
       ══════════════════════════════════════════════════════ */}
       <section
-        className="px-5 py-20"
+        className="px-5 py-12 sm:py-20"
         style={{ borderBottom: "1px solid var(--border)" }}
       >
         <div className="mx-auto" style={{ maxWidth: "1080px" }}>
@@ -656,10 +681,10 @@ export default function LandingPage() {
           </p>
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {AVIS.map((avis) => (
+            {AVIS.map((avis, i) => (
               <div
                 key={avis.nom}
-                className="flex flex-col overflow-hidden rounded-[18px]"
+                className={`flex flex-col overflow-hidden rounded-[18px]${i >= 2 ? " hidden sm:flex" : ""}`}
                 style={{
                   backgroundColor: "var(--surface)",
                   border: "1px solid var(--border)",
@@ -667,8 +692,8 @@ export default function LandingPage() {
               >
                 {/* Photo — zoom 10% sur le visage */}
                 <div
-                  className="relative w-full"
-                  style={{ height: "200px", overflow: "hidden" }}
+                  className="relative w-full h-[160px] sm:h-[200px]"
+                  style={{ overflow: "hidden" }}
                 >
                   <Image
                     src={avis.image}
@@ -732,7 +757,7 @@ export default function LandingPage() {
           8 — PRICING
       ══════════════════════════════════════════════════════ */}
       <section
-        className="px-5 py-20"
+        className="px-5 py-14 sm:py-20"
         style={{
           backgroundColor: "var(--surface)",
           borderBottom: "1px solid var(--border)",
@@ -852,7 +877,7 @@ export default function LandingPage() {
           9 — FAQ
       ══════════════════════════════════════════════════════ */}
       <section
-        className="px-5 py-20"
+        className="px-5 py-14 sm:py-20"
         style={{ borderBottom: "1px solid var(--border)" }}
       >
         <div className="mx-auto" style={{ maxWidth: "640px" }}>
@@ -908,7 +933,7 @@ export default function LandingPage() {
           10 — CTA FINAL
       ══════════════════════════════════════════════════════ */}
       <section
-        className="px-5 py-24 text-center"
+        className="px-5 py-16 sm:py-24 text-center"
         style={{
           backgroundColor: "var(--surface)",
           borderBottom: "1px solid var(--border)",
@@ -916,13 +941,13 @@ export default function LandingPage() {
       >
         <div className="mx-auto" style={{ maxWidth: "560px" }}>
           <h2
-            className="mb-4 text-3xl font-semibold leading-snug"
+            className="mb-4 text-2xl sm:text-3xl font-semibold leading-snug"
             style={{ color: "var(--text)" }}
           >
             Ton prochain post est à 15 secondes.
           </h2>
           <p
-            className="mb-8 text-base leading-relaxed"
+            className="mb-7 text-base leading-relaxed"
             style={{ color: "var(--text-muted)" }}
           >
             Rejoins les professionnelles de la beauté qui publient sans effort
@@ -930,8 +955,8 @@ export default function LandingPage() {
           </p>
           <a
             href={CHECKOUT_URL}
-            className="btn btn-primary"
-            style={{ fontSize: "1.0625rem", padding: "0.85rem 2rem" }}
+            className="btn btn-primary w-full sm:w-auto"
+            style={{ fontSize: "1.0625rem", padding: "0.85rem 2rem", display: "flex", justifyContent: "center" }}
           >
             Commencer pour 29€/mois →
           </a>
@@ -940,6 +965,34 @@ export default function LandingPage() {
           </p>
         </div>
       </section>
+
+      {/* ══════════════════════════════════════════════════════
+          STICKY BAR — mobile uniquement (lg:hidden)
+          Toujours visible en bas de l'écran
+      ══════════════════════════════════════════════════════ */}
+      <div
+        className="fixed bottom-0 left-0 right-0 z-50 px-4 py-3 lg:hidden"
+        style={{
+          backgroundColor: "var(--surface)",
+          borderTop: "1px solid var(--border)",
+          boxShadow: "0 -4px 20px rgba(0,0,0,0.10)",
+        }}
+      >
+        <a
+          href={CHECKOUT_URL}
+          className="btn btn-primary"
+          style={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            fontSize: "1rem",
+            padding: "0.75rem 1.5rem",
+          }}
+        >
+          Commencer pour 29€/mois →
+        </a>
+      </div>
 
       {/* ══════════════════════════════════════════════════════
           FOOTER
