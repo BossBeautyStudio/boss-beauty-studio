@@ -256,7 +256,7 @@ export default function LandingPage() {
 
           {/* ── Colonne image (42%) ── */}
           <div
-            className="relative w-full h-[240px] md:h-[420px] overflow-hidden rounded-xl lg:rounded-none lg:flex-none lg:w-[42%]"
+            className="relative w-full h-[240px] md:h-[420px] lg:h-auto overflow-hidden rounded-xl lg:rounded-none lg:flex-none lg:w-[42%]"
           >
             <Image
               src="/images/hero-estheticienne.jpg"
@@ -295,7 +295,7 @@ export default function LandingPage() {
         >
           {/* ── Colonne texte (55%) ── */}
           <div
-            className="flex flex-col justify-center px-6 py-10 lg:py-20 lg:pl-16 max-w-[520px] mx-auto lg:max-w-none lg:mx-0"
+            className="flex flex-col justify-center px-6 py-10 lg:py-20 lg:pl-16"
             style={{ flex: "0 0 55%" }}
           >
             <p
@@ -327,7 +327,7 @@ export default function LandingPage() {
 
           {/* ── Colonne image (45%) — zoom réduit ── */}
           <div
-            className="relative w-full h-[240px] md:h-[420px] overflow-hidden rounded-xl lg:rounded-none lg:flex-none lg:w-[45%]"
+            className="relative w-full h-[240px] md:h-[420px] lg:h-auto overflow-hidden rounded-xl lg:rounded-none lg:flex-none lg:w-[45%]"
           >
             <Image
               src="/images/probleme-estheticienne.jpg"
@@ -358,7 +358,7 @@ export default function LandingPage() {
         >
           {/* ── Colonne texte (55%) ── */}
           <div
-            className="flex flex-col justify-center px-6 py-10 lg:py-20 lg:pr-16 max-w-[520px] mx-auto lg:max-w-none lg:mx-0"
+            className="flex flex-col justify-center px-6 py-10 lg:py-20 lg:pr-16"
             style={{ flex: "0 0 55%" }}
           >
             <p
@@ -390,7 +390,7 @@ export default function LandingPage() {
 
           {/* ── Colonne image (45%) ── */}
           <div
-            className="relative w-full h-[240px] md:h-[420px] overflow-hidden rounded-xl lg:rounded-none lg:flex-none lg:w-[45%]"
+            className="relative w-full h-[240px] md:h-[420px] lg:h-auto overflow-hidden rounded-xl lg:rounded-none lg:flex-none lg:w-[45%]"
           >
             <Image
               src="/images/solution-estheticienne.jpg"
@@ -425,7 +425,7 @@ export default function LandingPage() {
         >
           {/* ── Colonne texte + DM (55%) ── */}
           <div
-            className="flex flex-col justify-center px-6 py-10 lg:py-20 lg:pl-16 max-w-[520px] mx-auto lg:max-w-none lg:mx-0"
+            className="flex flex-col justify-center px-6 py-10 lg:py-20 lg:pl-16"
             style={{ flex: "0 0 55%" }}
           >
             <p
@@ -486,7 +486,7 @@ export default function LandingPage() {
 
           {/* ── Colonne image (45%) ── */}
           <div
-            className="relative w-full h-[240px] md:h-[420px] overflow-hidden rounded-xl lg:rounded-none lg:flex-none lg:w-[45%]"
+            className="relative w-full h-[240px] md:h-[420px] lg:h-auto overflow-hidden rounded-xl lg:rounded-none lg:flex-none lg:w-[45%]"
           >
             <Image
               src="/images/notification-client.jpg"
@@ -553,7 +553,7 @@ export default function LandingPage() {
         >
           {/* ── Colonne texte (42%) ── */}
           <div
-            className="flex flex-col justify-center px-6 py-10 lg:py-20 lg:pr-14 max-w-[520px] mx-auto lg:max-w-none lg:mx-0"
+            className="flex flex-col justify-center px-6 py-10 lg:py-20 lg:pr-14"
             style={{ flex: "0 0 42%" }}
           >
             <p
@@ -608,7 +608,7 @@ export default function LandingPage() {
 
           {/* ── Colonne image dashboard (58%) ── */}
           <div
-            className="relative w-full h-[240px] md:h-[420px] overflow-hidden rounded-xl lg:rounded-none lg:flex-none lg:w-[58%]"
+            className="relative w-full h-[240px] md:h-[420px] lg:h-auto overflow-hidden rounded-xl lg:rounded-none lg:flex-none lg:w-[58%]"
           >
             <Image
               src="/images/dashboard-saas.jpg"
@@ -667,7 +667,7 @@ export default function LandingPage() {
               >
                 {/* Photo */}
                 <div
-                  className="relative w-full h-[160px] sm:h-[200px] overflow-hidden"
+                  className={`relative w-full overflow-hidden ${i < 2 ? "h-[200px]" : "h-[160px]"} sm:h-[200px]`}
                 >
                   <Image
                     src={avis.image}
