@@ -257,7 +257,7 @@ export default function LandingPage() {
           {/* ── Colonne image (42%) ── */}
           <div
             id="img-hero"
-            className="relative w-full h-[240px] md:h-[420px] lg:h-auto lg:min-h-[380px] lg:w-auto overflow-hidden"
+            className="relative w-full h-[240px] md:h-[420px] overflow-hidden lg:w-auto"
             style={{ flex: "0 0 42%" }}
           >
             <Image
@@ -330,7 +330,7 @@ export default function LandingPage() {
           {/* ── Colonne image (45%) — zoom réduit ── */}
           <div
             id="img-probleme"
-            className="relative w-full h-[240px] md:h-[420px] lg:h-auto lg:min-h-[360px] lg:w-auto overflow-hidden"
+            className="relative w-full h-[240px] md:h-[420px] overflow-hidden lg:w-auto"
             style={{ flex: "0 0 45%" }}
           >
             <Image
@@ -395,7 +395,7 @@ export default function LandingPage() {
           {/* ── Colonne image (45%) ── */}
           <div
             id="img-solution"
-            className="relative w-full h-[240px] md:h-[420px] lg:h-auto lg:min-h-[360px] lg:w-auto overflow-hidden"
+            className="relative w-full h-[240px] md:h-[420px] overflow-hidden lg:w-auto"
             style={{ flex: "0 0 45%" }}
           >
             <Image
@@ -493,7 +493,7 @@ export default function LandingPage() {
           {/* ── Colonne image (45%) ── */}
           <div
             id="img-resultat"
-            className="relative w-full h-[240px] md:h-[420px] lg:h-auto lg:min-h-[360px] lg:w-auto overflow-hidden"
+            className="relative w-full h-[240px] md:h-[420px] overflow-hidden lg:w-auto"
             style={{ flex: "0 0 45%" }}
           >
             <Image
@@ -616,7 +616,7 @@ export default function LandingPage() {
 
           {/* ── Colonne image dashboard (58%) ── */}
           <div
-            className="relative w-full h-[240px] md:h-[420px] lg:h-auto lg:min-h-[360px] lg:w-auto overflow-hidden"
+            className="relative w-full h-[240px] md:h-[420px] overflow-hidden lg:w-auto"
             style={{ flex: "0 0 58%" }}
           >
             <Image
@@ -684,11 +684,10 @@ export default function LandingPage() {
                     alt={`Avis de ${avis.nom}`}
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="scale-[0.88] sm:scale-[1.1] [transform-origin:center_18%]"
                     style={{
                       objectFit: "cover",
                       objectPosition: "center 15%",
-                      transform: "scale(1.1)",
-                      transformOrigin: "center 18%",
                     }}
                   />
                 </div>
