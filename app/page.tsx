@@ -256,17 +256,15 @@ export default function LandingPage() {
 
           {/* ── Colonne image (42%) ── */}
           <div
-            id="img-hero"
-            className="relative w-full h-[240px] md:h-[420px] overflow-hidden lg:w-auto"
-            style={{ flex: "0 0 42%" }}
+            className="relative w-full h-[240px] md:h-[420px] overflow-hidden rounded-xl lg:rounded-none lg:flex-none lg:w-[42%]"
           >
             <Image
               src="/images/hero-estheticienne.jpg"
               alt="Esthéticienne professionnelle"
               fill
               priority
-              sizes="(max-width: 1024px) 100vw, 42vw"
-              className="object-cover object-center scale-[0.9] md:scale-100"
+              sizes="(max-width: 768px) 100vw, 42vw"
+              className="object-cover object-center"
             />
             {/* Fondu gauche sur desktop */}
             <div
@@ -329,16 +327,14 @@ export default function LandingPage() {
 
           {/* ── Colonne image (45%) — zoom réduit ── */}
           <div
-            id="img-probleme"
-            className="relative w-full h-[240px] md:h-[420px] overflow-hidden lg:w-auto"
-            style={{ flex: "0 0 45%" }}
+            className="relative w-full h-[240px] md:h-[420px] overflow-hidden rounded-xl lg:rounded-none lg:flex-none lg:w-[45%]"
           >
             <Image
               src="/images/probleme-estheticienne.jpg"
               alt="Esthéticienne face au problème de contenu Instagram"
               fill
-              sizes="(max-width: 1024px) 100vw, 45vw"
-              className="object-cover object-center scale-[0.9] md:scale-100"
+              sizes="(max-width: 768px) 100vw, 45vw"
+              className="object-cover object-center"
             />
             <div
               className="absolute inset-y-0 right-0 hidden lg:block"
@@ -394,16 +390,14 @@ export default function LandingPage() {
 
           {/* ── Colonne image (45%) ── */}
           <div
-            id="img-solution"
-            className="relative w-full h-[240px] md:h-[420px] overflow-hidden lg:w-auto"
-            style={{ flex: "0 0 45%" }}
+            className="relative w-full h-[240px] md:h-[420px] overflow-hidden rounded-xl lg:rounded-none lg:flex-none lg:w-[45%]"
           >
             <Image
               src="/images/solution-estheticienne.jpg"
               alt="Esthéticienne satisfaite avec son contenu généré"
               fill
-              sizes="(max-width: 1024px) 100vw, 45vw"
-              className="object-cover object-center scale-[0.9] md:scale-100"
+              sizes="(max-width: 768px) 100vw, 45vw"
+              className="object-cover object-center"
             />
             <div
               className="absolute inset-y-0 left-0 hidden lg:block"
@@ -492,16 +486,14 @@ export default function LandingPage() {
 
           {/* ── Colonne image (45%) ── */}
           <div
-            id="img-resultat"
-            className="relative w-full h-[240px] md:h-[420px] overflow-hidden lg:w-auto"
-            style={{ flex: "0 0 45%" }}
+            className="relative w-full h-[240px] md:h-[420px] overflow-hidden rounded-xl lg:rounded-none lg:flex-none lg:w-[45%]"
           >
             <Image
               src="/images/notification-client.jpg"
               alt="Notification de réservation cliente"
               fill
-              sizes="(max-width: 1024px) 100vw, 45vw"
-              className="object-cover object-center scale-[0.9] md:scale-100"
+              sizes="(max-width: 768px) 100vw, 45vw"
+              className="object-cover object-center"
             />
             <div
               className="absolute inset-y-0 right-0 hidden lg:block"
@@ -616,15 +608,14 @@ export default function LandingPage() {
 
           {/* ── Colonne image dashboard (58%) ── */}
           <div
-            className="relative w-full h-[240px] md:h-[420px] overflow-hidden lg:w-auto"
-            style={{ flex: "0 0 58%" }}
+            className="relative w-full h-[240px] md:h-[420px] overflow-hidden rounded-xl lg:rounded-none lg:flex-none lg:w-[58%]"
           >
             <Image
               src="/images/dashboard-saas.jpg"
               alt="Dashboard Boss Beauty Studio"
               fill
-              sizes="(max-width: 1024px) 100vw, 58vw"
-              className="object-contain md:object-cover scale-[0.85] md:scale-100"
+              sizes="(max-width: 768px) 100vw, 58vw"
+              className="object-contain object-center md:object-cover"
             />
             <div
               className="absolute inset-y-0 left-0 hidden lg:block"
@@ -674,21 +665,16 @@ export default function LandingPage() {
                   border: "1px solid var(--border)",
                 }}
               >
-                {/* Photo — zoom 10% sur le visage */}
+                {/* Photo */}
                 <div
-                  className="relative w-full h-[160px] sm:h-[200px]"
-                  style={{ overflow: "hidden" }}
+                  className="relative w-full h-[160px] sm:h-[200px] overflow-hidden"
                 >
                   <Image
                     src={avis.image}
                     alt={`Avis de ${avis.nom}`}
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className="scale-[0.88] sm:scale-[1.1] [transform-origin:center_18%]"
-                    style={{
-                      objectFit: "cover",
-                      objectPosition: "center 15%",
-                    }}
+                    className="object-cover object-top"
                   />
                 </div>
 
