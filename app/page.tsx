@@ -97,6 +97,26 @@ export default function LandingPage() {
     <div className="pb-[72px] lg:pb-0" style={{ backgroundColor: "var(--bg)", minHeight: "100dvh" }}>
 
       {/* ══════════════════════════════════════════════════════
+          RESPONSIVE IMAGE POSITIONS — mobile uniquement
+          Inline styles ont priorité 1000 → !important requis.
+          Desktop (lg = 1024px+) : valeurs inchangées.
+          Mobile : objectPosition abaissé pour montrer
+                   visage + téléphone dans la main.
+      ══════════════════════════════════════════════════════ */}
+      <style>{`
+        @media (max-width: 1023px) {
+          /* Hero — téléphone visible en abaissant la fenêtre */
+          #img-hero img      { object-position: center 38% !important; }
+          /* Problème — montre épaules + téléphone */
+          #img-probleme img  { object-position: center 48% !important; }
+          /* Solution — recadrage plus bas pour téléphone */
+          #img-solution img  { object-position: center 40% !important; }
+          /* Résultat — notifications téléphone bien centré */
+          #img-resultat img  { object-position: center 44% !important; }
+        }
+      `}</style>
+
+      {/* ══════════════════════════════════════════════════════
           NAV
       ══════════════════════════════════════════════════════ */}
       <nav
@@ -159,7 +179,7 @@ export default function LandingPage() {
           >
             {/* Badge niche */}
             <div
-              className="mb-5 inline-flex w-fit items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold"
+              className="mb-5 inline-flex w-fit self-center items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold lg:self-start"
               style={{
                 backgroundColor: "var(--surface-alt)",
                 border: "1px solid var(--border)",
@@ -171,7 +191,7 @@ export default function LandingPage() {
 
             {/* H1 */}
             <h1
-              className="mb-4 text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl"
+              className="mb-4 text-center text-3xl font-semibold leading-tight sm:text-4xl lg:text-left lg:text-5xl"
               style={{ color: "var(--text)" }}
             >
               Transforme ton Instagram
@@ -182,7 +202,7 @@ export default function LandingPage() {
             </h1>
 
             <p
-              className="mb-7 max-w-[420px] text-base leading-relaxed lg:text-lg"
+              className="mb-7 mx-auto max-w-[420px] text-center text-base leading-relaxed lg:mx-0 lg:text-left lg:text-lg"
               style={{ color: "var(--text-muted)" }}
             >
               Boss Beauty Studio génère tes posts Instagram et t&apos;aide
@@ -202,7 +222,7 @@ export default function LandingPage() {
 
             {/* Réassurance 3 points sous le bouton */}
             <div
-              className="mt-6 flex flex-wrap gap-x-5 gap-y-2"
+              className="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 lg:justify-start"
             >
               {[
                 "✓ Résultats en 15 secondes",
@@ -221,7 +241,7 @@ export default function LandingPage() {
 
             {/* Preuve sociale — séparateur + ligne niche */}
             <div
-              className="mt-6 flex items-center gap-3 pt-6"
+              className="mt-6 flex items-center justify-center gap-3 pt-6 lg:justify-start"
               style={{ borderTop: "1px solid var(--border)" }}
             >
               {/* Avatars simulés */}
@@ -256,7 +276,8 @@ export default function LandingPage() {
 
           {/* ── Colonne image (42%) ── */}
           <div
-            className="relative w-full min-h-[220px] lg:min-h-[380px] lg:w-auto"
+            id="img-hero"
+            className="relative w-full min-h-[260px] lg:min-h-[380px] lg:w-auto"
             style={{ flex: "0 0 42%", overflow: "hidden" }}
           >
             <Image
@@ -333,7 +354,8 @@ export default function LandingPage() {
 
           {/* ── Colonne image (45%) — zoom réduit ── */}
           <div
-            className="relative w-full min-h-[200px] lg:min-h-[360px] lg:w-auto"
+            id="img-probleme"
+            className="relative w-full min-h-[240px] lg:min-h-[360px] lg:w-auto"
             style={{ flex: "0 0 45%", overflow: "hidden" }}
           >
             <Image
@@ -401,7 +423,8 @@ export default function LandingPage() {
 
           {/* ── Colonne image (45%) ── */}
           <div
-            className="relative w-full min-h-[200px] lg:min-h-[360px] lg:w-auto"
+            id="img-solution"
+            className="relative w-full min-h-[240px] lg:min-h-[360px] lg:w-auto"
             style={{ flex: "0 0 45%", overflow: "hidden" }}
           >
             <Image
@@ -503,7 +526,8 @@ export default function LandingPage() {
 
           {/* ── Colonne image (45%) ── */}
           <div
-            className="relative w-full min-h-[200px] lg:min-h-[360px] lg:w-auto"
+            id="img-resultat"
+            className="relative w-full min-h-[240px] lg:min-h-[360px] lg:w-auto"
             style={{ flex: "0 0 45%", overflow: "hidden" }}
           >
             <Image
