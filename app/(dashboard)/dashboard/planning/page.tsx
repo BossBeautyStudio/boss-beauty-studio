@@ -7,8 +7,9 @@
 // POST /api/generate/planning
 // ============================================================
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { FreeTrialBanner, PaywallBanner } from "@/components/dashboard/FreePaywall";
 
 interface PlanningPost {
   jour: number;
@@ -97,10 +98,27 @@ export default function PlanningPage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<PlanningOutput | null>(null);
 
+  // Free trial state
+  const [isFree, setIsFree] = useState(false);
+  const [freeRemaining, setFreeRemaining] = useState(0);
+
   // Conseil aléatoire sélectionné une seule fois au montage
   const [conseil] = useState<string>(
     () => CONSEILS_PLANNING[Math.floor(Math.random() * CONSEILS_PLANNING.length)]
   );
+
+  // Charger le statut de quota au montage
+  useEffect(() => {
+    fetch("/api/user/quota")
+      .then((r) => r.json())
+      .then((body) => {
+        if (body.isSubscriber === false) {
+          setIsFree(true);
+          setFreeRemaining(body.freeRemaining ?? 0);
+        }
+      })
+      .catch(() => {/* silently ignore */});
+  }, []);
 
   const objectifFinal =
     objectifSelect === "Autre…" ? objectifCustom.trim() : objectifSelect;
@@ -132,11 +150,23 @@ export default function PlanningPage() {
 
       const body = await res.json();
 
+      if (res.status === 402 && body.paywallRequired) {
+        setIsFree(true);
+        setFreeRemaining(0);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+
       if (!res.ok) {
         throw new Error(body.error ?? `Erreur ${res.status}`);
       }
 
       setResult(body.data);
+      if (body.isFree) {
+        setIsFree(true);
+        setFreeRemaining(body.freeRemaining ?? 0);
+      }
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur inconnue.");
@@ -160,6 +190,14 @@ export default function PlanningPage() {
       {/* Formulaire */}
       {!result && (
         <>
+          {/* Bandeau essai gratuit */}
+          {isFree && <FreeTrialBanner freeRemaining={freeRemaining} />}
+
+          {/* Paywall si quota épuisé */}
+          {isFree && freeRemaining <= 0 && (
+            <PaywallBanner freeRemaining={0} />
+          )}
+
           {/* Bloc d'explication renforcé */}
           <div
             className="mb-6 rounded-[14px] px-5 py-5"
@@ -507,6 +545,9 @@ export default function PlanningPage() {
               {conseil}
             </p>
           </div>
+
+          {/* Bandeau paywall free trial */}
+          {isFree && <PaywallBanner freeRemaining={freeRemaining} />}
         </div>
       )}
     </div>

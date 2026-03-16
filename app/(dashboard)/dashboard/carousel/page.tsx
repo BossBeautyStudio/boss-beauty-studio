@@ -7,8 +7,9 @@
 // POST /api/generate/carousel
 // ============================================================
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { FreeTrialBanner, CopyButton, PaywallBanner } from "@/components/dashboard/FreePaywall";
 
 interface CarouselSlide {
   numero: number;
@@ -111,10 +112,27 @@ export default function CarouselPage() {
   const [result, setResult] = useState<CarouselOutput | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
 
+  // Free trial state
+  const [isFree, setIsFree] = useState(false);
+  const [freeRemaining, setFreeRemaining] = useState(0);
+
   // Conseil aléatoire sélectionné une seule fois au montage
   const [conseil] = useState<string>(
     () => CONSEILS_CAROUSEL[Math.floor(Math.random() * CONSEILS_CAROUSEL.length)]
   );
+
+  // Charger le statut de quota au montage
+  useEffect(() => {
+    fetch("/api/user/quota")
+      .then((r) => r.json())
+      .then((body) => {
+        if (body.isSubscriber === false) {
+          setIsFree(true);
+          setFreeRemaining(body.freeRemaining ?? 0);
+        }
+      })
+      .catch(() => {/* silently ignore */});
+  }, []);
 
   async function handleCopy(text: string, key: string) {
     try {
@@ -147,11 +165,23 @@ export default function CarouselPage() {
 
       const body = await res.json();
 
+      if (res.status === 402 && body.paywallRequired) {
+        setIsFree(true);
+        setFreeRemaining(0);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+
       if (!res.ok) {
         throw new Error(body.error ?? `Erreur ${res.status}`);
       }
 
       setResult(body.data);
+      if (body.isFree) {
+        setIsFree(true);
+        setFreeRemaining(body.freeRemaining ?? 0);
+      }
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur inconnue.");
@@ -177,6 +207,14 @@ export default function CarouselPage() {
       {/* Formulaire */}
       {!result && (
         <>
+          {/* Bandeau essai gratuit */}
+          {isFree && <FreeTrialBanner freeRemaining={freeRemaining} />}
+
+          {/* Paywall si quota épuisé */}
+          {isFree && freeRemaining <= 0 && (
+            <PaywallBanner freeRemaining={0} />
+          )}
+
           {/* Bloc d'explication renforcé */}
           <div
             className="mb-6 rounded-[14px] px-5 py-5"
@@ -414,13 +452,13 @@ export default function CarouselPage() {
               <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
                 Texte de publication
               </p>
-              <button
+              <CopyButton
+                text={result.caption}
+                label="📋 Copier"
+                isFree={isFree}
+                freeRemaining={freeRemaining}
                 className="btn btn-secondary shrink-0"
-                style={{ fontSize: "0.72rem", padding: "0.3rem 0.7rem" }}
-                onClick={() => handleCopy(result.caption, "caption")}
-              >
-                {copied === "caption" ? "✓ Copié !" : "📋 Copier"}
-              </button>
+              />
             </div>
             <p className="mb-4 text-sm leading-relaxed whitespace-pre-line" style={{ color: "var(--text)" }}>
               {result.caption}
@@ -430,13 +468,13 @@ export default function CarouselPage() {
               <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
                 Hashtags
               </p>
-              <button
+              <CopyButton
+                text={result.hashtags.join(" ")}
+                label="📋 Copier"
+                isFree={isFree}
+                freeRemaining={freeRemaining}
                 className="btn btn-secondary shrink-0"
-                style={{ fontSize: "0.72rem", padding: "0.3rem 0.7rem" }}
-                onClick={() => handleCopy(result.hashtags.join(" "), "hashtags")}
-              >
-                {copied === "hashtags" ? "✓ Copié !" : "📋 Copier"}
-              </button>
+              />
             </div>
             <div className="mb-4 flex flex-wrap gap-1.5">
               {result.hashtags.map((tag) => (
@@ -650,6 +688,9 @@ export default function CarouselPage() {
               {conseil}
             </p>
           </div>
+
+          {/* Bandeau paywall free trial */}
+          {isFree && <PaywallBanner freeRemaining={freeRemaining} />}
         </div>
       )}
     </div>

@@ -124,6 +124,49 @@ function PaywallModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+// ── FreeTrialBanner — bandeau pré-formulaire ──────────────────────────────────
+
+interface FreeTrialBannerProps {
+  freeRemaining: number;
+}
+
+/**
+ * Bandeau compact affiché AU-DESSUS du formulaire pour les utilisateurs en essai.
+ * Disparaît si freeRemaining <= 0 (PaywallBanner prend le relais dans les résultats).
+ */
+export function FreeTrialBanner({ freeRemaining }: FreeTrialBannerProps) {
+  if (freeRemaining <= 0) return null;
+  const isLast = freeRemaining === 1;
+
+  return (
+    <div
+      className="mb-6 flex items-center justify-between gap-4 rounded-[12px] px-4 py-3"
+      style={{
+        backgroundColor: isLast ? "var(--surface)" : "var(--surface-alt)",
+        border: isLast ? "1px solid var(--accent)" : "1px solid var(--border)",
+      }}
+    >
+      <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+        {isLast && "⚠️ "}
+        <span
+          className="font-medium"
+          style={{ color: isLast ? "var(--accent)" : "var(--text)" }}
+        >
+          {freeRemaining} génération{freeRemaining > 1 ? "s" : ""} gratuite
+          {freeRemaining > 1 ? "s" : ""} restante{freeRemaining > 1 ? "s" : ""}
+        </span>
+      </p>
+      <a
+        href={CHECKOUT_URL}
+        className="shrink-0 text-xs font-semibold"
+        style={{ color: "var(--accent)" }}
+      >
+        S&apos;abonner →
+      </a>
+    </div>
+  );
+}
+
 // ── CopyButton avec logique paywall ──────────────────────────────────────────
 
 interface CopyButtonProps {
@@ -182,13 +225,13 @@ export function CopyButton({
           )}
         </button>
 
-        {/* Badge "N essai(s) restant(s)" pour les utilisateurs en essai */}
+        {/* Badge "N génération(s) restante(s)" pour les utilisateurs en essai */}
         {isFree && freeRemaining > 0 && (
           <span
             className="text-[10px] font-medium"
             style={{ color: "var(--text-muted)" }}
           >
-            {freeRemaining} copie{freeRemaining > 1 ? "s" : ""} gratuite{freeRemaining > 1 ? "s" : ""} restante{freeRemaining > 1 ? "s" : ""}
+            {freeRemaining} génération{freeRemaining > 1 ? "s" : ""} gratuite{freeRemaining > 1 ? "s" : ""} restante{freeRemaining > 1 ? "s" : ""}
           </span>
         )}
       </div>

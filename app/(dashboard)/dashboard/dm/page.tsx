@@ -7,8 +7,9 @@
 // POST /api/generate/dm
 // ============================================================
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { FreeTrialBanner, CopyButton, PaywallBanner } from "@/components/dashboard/FreePaywall";
 
 interface DmVariante {
   courte: string;
@@ -55,10 +56,27 @@ export default function DmPage() {
   const [result, setResult] = useState<DmVariante | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
 
+  // Free trial state
+  const [isFree, setIsFree] = useState(false);
+  const [freeRemaining, setFreeRemaining] = useState(0);
+
   // Conseil aléatoire sélectionné une seule fois au montage
   const [conseil] = useState<string>(
     () => CONSEILS_DM[Math.floor(Math.random() * CONSEILS_DM.length)]
   );
+
+  // Charger le statut de quota au montage
+  useEffect(() => {
+    fetch("/api/user/quota")
+      .then((r) => r.json())
+      .then((body) => {
+        if (body.isSubscriber === false) {
+          setIsFree(true);
+          setFreeRemaining(body.freeRemaining ?? 0);
+        }
+      })
+      .catch(() => {/* silently ignore */});
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -79,11 +97,23 @@ export default function DmPage() {
 
       const body = await res.json();
 
+      if (res.status === 402 && body.paywallRequired) {
+        setIsFree(true);
+        setFreeRemaining(0);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+
       if (!res.ok) {
         throw new Error(body.error ?? `Erreur ${res.status}`);
       }
 
       setResult(body.data);
+      if (body.isFree) {
+        setIsFree(true);
+        setFreeRemaining(body.freeRemaining ?? 0);
+      }
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur inconnue.");
@@ -124,6 +154,14 @@ export default function DmPage() {
       {/* Formulaire */}
       {!result && (
         <>
+          {/* Bandeau essai gratuit */}
+          {isFree && <FreeTrialBanner freeRemaining={freeRemaining} />}
+
+          {/* Paywall si quota épuisé */}
+          {isFree && freeRemaining <= 0 && (
+            <PaywallBanner freeRemaining={0} />
+          )}
+
           {/* Bloc d'explication renforcé */}
           <div
             className="mb-6 rounded-[14px] px-5 py-5"
@@ -330,6 +368,8 @@ export default function DmPage() {
               colorKey="courte"
               copied={copied}
               onCopy={handleCopy}
+              isFree={isFree}
+              freeRemaining={freeRemaining}
             />
 
             {/* Variante standard */}
@@ -340,6 +380,8 @@ export default function DmPage() {
               colorKey="standard"
               copied={copied}
               onCopy={handleCopy}
+              isFree={isFree}
+              freeRemaining={freeRemaining}
             />
 
             {/* Variante premium */}
@@ -350,6 +392,8 @@ export default function DmPage() {
               colorKey="premium"
               copied={copied}
               onCopy={handleCopy}
+              isFree={isFree}
+              freeRemaining={freeRemaining}
             />
           </div>
 
@@ -427,6 +471,9 @@ export default function DmPage() {
               {conseil}
             </p>
           </div>
+
+          {/* Bandeau paywall free trial */}
+          {isFree && <PaywallBanner freeRemaining={freeRemaining} />}
         </div>
       )}
     </div>
@@ -442,9 +489,11 @@ interface VarianteCardProps {
   colorKey: string;
   copied: string | null;
   onCopy: (text: string, key: string) => void;
+  isFree: boolean;
+  freeRemaining: number;
 }
 
-function VarianteCard({ label, description, text, colorKey, copied, onCopy }: VarianteCardProps) {
+function VarianteCard({ label, description, text, colorKey, copied, onCopy, isFree, freeRemaining }: VarianteCardProps) {
   return (
     <div className="card">
       {/* En-tête */}
@@ -457,13 +506,13 @@ function VarianteCard({ label, description, text, colorKey, copied, onCopy }: Va
             {description}
           </p>
         </div>
-        <button
+        <CopyButton
+          text={text}
+          label="Copier"
+          isFree={isFree}
+          freeRemaining={freeRemaining}
           className="btn btn-secondary shrink-0"
-          style={{ fontSize: "0.75rem", padding: "0.35rem 0.75rem" }}
-          onClick={() => onCopy(text, colorKey)}
-        >
-          {copied === colorKey ? "✓ Copié !" : "Copier"}
-        </button>
+        />
       </div>
 
       {/* Texte */}

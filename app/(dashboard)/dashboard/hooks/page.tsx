@@ -7,8 +7,9 @@
 // POST /api/generate/hooks
 // ============================================================
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { FreeTrialBanner, CopyButton, PaywallBanner } from "@/components/dashboard/FreePaywall";
 
 interface HookItem {
   numero: number;
@@ -93,10 +94,27 @@ export default function HooksPage() {
   const [result, setResult] = useState<HooksOutput | null>(null);
   const [copied, setCopied] = useState<number | null>(null);
 
+  // Free trial state
+  const [isFree, setIsFree] = useState(false);
+  const [freeRemaining, setFreeRemaining] = useState(0);
+
   // Conseil aléatoire sélectionné une seule fois au montage
   const [conseil] = useState<string>(
     () => CONSEILS_HOOKS[Math.floor(Math.random() * CONSEILS_HOOKS.length)]
   );
+
+  // Charger le statut de quota au montage
+  useEffect(() => {
+    fetch("/api/user/quota")
+      .then((r) => r.json())
+      .then((body) => {
+        if (body.isSubscriber === false) {
+          setIsFree(true);
+          setFreeRemaining(body.freeRemaining ?? 0);
+        }
+      })
+      .catch(() => {/* silently ignore */});
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -113,11 +131,23 @@ export default function HooksPage() {
 
       const body = await res.json();
 
+      if (res.status === 402 && body.paywallRequired) {
+        setIsFree(true);
+        setFreeRemaining(0);
+        setError(null);
+        setLoading(false);
+        return;
+      }
+
       if (!res.ok) {
         throw new Error(body.error ?? `Erreur ${res.status}`);
       }
 
       setResult(body.data);
+      if (body.isFree) {
+        setIsFree(true);
+        setFreeRemaining(body.freeRemaining ?? 0);
+      }
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur inconnue.");
@@ -153,6 +183,14 @@ export default function HooksPage() {
       {/* Formulaire */}
       {!result && (
         <>
+          {/* Bandeau essai gratuit */}
+          {isFree && <FreeTrialBanner freeRemaining={freeRemaining} />}
+
+          {/* Paywall si quota épuisé */}
+          {isFree && freeRemaining <= 0 && (
+            <PaywallBanner freeRemaining={0} />
+          )}
+
           {/* Bloc explicatif */}
           <div
             className="mb-4 rounded-[14px] px-5 py-4"
@@ -335,13 +373,13 @@ export default function HooksPage() {
                       {item.hook}
                     </p>
                   </div>
-                  <button
+                  <CopyButton
+                    text={item.hook}
+                    label="Copier"
+                    isFree={isFree}
+                    freeRemaining={freeRemaining}
                     className="btn btn-secondary shrink-0"
-                    style={{ fontSize: "0.7rem", padding: "0.3rem 0.65rem" }}
-                    onClick={() => handleCopy(item.hook, item.numero)}
-                  >
-                    {copied === item.numero ? "✓ Copié !" : "Copier"}
-                  </button>
+                  />
                 </div>
 
                 {/* Pourquoi ça marche */}
@@ -447,6 +485,9 @@ export default function HooksPage() {
               {conseil}
             </p>
           </div>
+
+          {/* Bandeau paywall free trial */}
+          {isFree && <PaywallBanner freeRemaining={freeRemaining} />}
         </div>
       )}
     </div>

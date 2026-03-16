@@ -6,8 +6,8 @@
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { checkQuota } from "@/lib/quota";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { checkQuota, FREE_LIMIT } from "@/lib/quota";
 
 const MODULES = [
   {
@@ -142,13 +142,30 @@ export default async function DashboardPage() {
     user.email?.split("@")[0] ??
     "toi";
 
-  // Quota — lecture silencieuse
+  // Statut utilisateur — lecture silencieuse
   let quota = null;
+  let isSubscriber = false;
+  let freeUsed = 0;
+
   try {
-    quota = await checkQuota(user.id);
+    const serviceClient = createServiceClient();
+    const { data: userData } = await serviceClient
+      .from("users")
+      .select("subscription_status, free_quota_used")
+      .eq("id", user.id)
+      .single();
+
+    isSubscriber = userData?.subscription_status === "active";
+    freeUsed = userData?.free_quota_used ?? 0;
+
+    if (isSubscriber) {
+      quota = await checkQuota(user.id);
+    }
   } catch {
     // Non critique
   }
+
+  const freeRemaining = Math.max(0, FREE_LIMIT - freeUsed);
 
   return (
     <div className="fade-in">
@@ -171,8 +188,8 @@ export default async function DashboardPage() {
             </p>
           </div>
 
-          {/* Compteur quota */}
-          {quota && (
+          {/* Compteur quota — abonnées */}
+          {isSubscriber && quota && (
             <div
               className="shrink-0 rounded-xl px-4 py-3 text-right"
               style={{
@@ -200,6 +217,43 @@ export default async function DashboardPage() {
                   / {quota.limit}
                 </span>
               </p>
+            </div>
+          )}
+
+          {/* Compteur quota — essai gratuit */}
+          {!isSubscriber && (
+            <div
+              className="shrink-0 rounded-xl px-4 py-3 text-right"
+              style={{
+                backgroundColor: "var(--surface)",
+                border: freeRemaining === 0 ? "1px solid var(--accent)" : "1px solid var(--border)",
+                minWidth: "148px",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+              }}
+            >
+              <p
+                className="text-xs font-medium"
+                style={{ color: "var(--text-muted)" }}
+              >
+                Essai gratuit
+              </p>
+              <p
+                className="mt-0.5 text-xl font-semibold tabular-nums"
+                style={{ color: freeRemaining === 0 ? "var(--accent)" : "var(--text)" }}
+              >
+                {freeRemaining}
+                <span
+                  className="ml-1 text-sm font-normal"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  / {FREE_LIMIT}
+                </span>
+              </p>
+              {freeRemaining === 0 && (
+                <p className="mt-0.5 text-[10px]" style={{ color: "var(--accent)" }}>
+                  Quota épuisé
+                </p>
+              )}
             </div>
           )}
         </div>

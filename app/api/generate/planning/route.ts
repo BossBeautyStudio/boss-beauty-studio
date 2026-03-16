@@ -22,8 +22,11 @@ import { createClient } from "@/lib/supabase/server";
 import {
   assertQuota,
   incrementQuota,
+  checkFreeQuota,
+  incrementFreeQuota,
   QuotaExceededError,
   SubscriptionInactiveError,
+  FREE_LIMIT,
 } from "@/lib/quota";
 import { saveGeneration } from "@/lib/db";
 import { callClaudeJSON } from "@/lib/claude";
@@ -108,17 +111,36 @@ export async function POST(req: NextRequest) {
 
   // 3. Vérification abonnement + quota
   let quotaStatus;
+  let isFreeGeneration = false;
+  let freeRemainingAfter = 0;
 
   try {
     quotaStatus = await assertQuota(userId);
   } catch (err) {
     if (err instanceof SubscriptionInactiveError) {
-      return NextResponse.json(
-        { error: err.message },
-        { status: 403 }
-      );
-    }
-    if (err instanceof QuotaExceededError) {
+      // Vérifier le quota gratuit
+      let freeStatus;
+      try {
+        freeStatus = await checkFreeQuota(userId);
+      } catch {
+        return NextResponse.json(
+          { error: "Erreur lors de la vérification du quota gratuit." },
+          { status: 500 }
+        );
+      }
+      if (!freeStatus.allowed) {
+        return NextResponse.json(
+          {
+            error: "Tu as utilisé tes 3 générations gratuites.",
+            paywallRequired: true,
+            freeLimit: FREE_LIMIT,
+          },
+          { status: 402 }
+        );
+      }
+      isFreeGeneration = true;
+      freeRemainingAfter = freeStatus.freeRemaining - 1;
+    } else if (err instanceof QuotaExceededError) {
       return NextResponse.json(
         {
           error: err.message,
@@ -130,21 +152,21 @@ export async function POST(req: NextRequest) {
         },
         { status: 403 }
       );
+    } else {
+      console.error("[planning] assertQuota unexpected error:", err);
+      return NextResponse.json(
+        { error: "Erreur lors de la vérification du quota." },
+        { status: 500 }
+      );
     }
-    console.error("[planning] assertQuota unexpected error:", err);
-    return NextResponse.json(
-      { error: "Erreur lors de la vérification du quota." },
-      { status: 500 }
-    );
   }
 
-  // 4. Génération — mock ou Claude
+  // 4. Génération — mock ou Claude (toujours mock pour les générations gratuites)
   let data: PlanningOutput;
   let tokensUsed: number;
 
-  if (isMockMode()) {
-    // Mode test : données fictives, aucun crédit Anthropic consommé
-    // Délai simulé pour que le loader UI reste visible (réaliste)
+  if (isMockMode() || isFreeGeneration) {
+    // Mode test ou génération gratuite : données fictives, aucun crédit Anthropic consommé
     await new Promise((r) => setTimeout(r, 800));
     data = getMockPlanning();
     tokensUsed = MOCK_TOKENS_USED;
@@ -167,13 +189,19 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // 5. Incrément quota
-  try {
-    await incrementQuota(userId);
-  } catch (err) {
-    // L'incrément a échoué mais la génération est réussie.
-    // On logue sans bloquer la réponse.
-    console.error("[planning] incrementQuota error:", err);
+  // 5. Incrément quota (abonné) ou quota gratuit
+  if (isFreeGeneration) {
+    try {
+      await incrementFreeQuota(userId);
+    } catch (err) {
+      console.error("[planning] incrementFreeQuota error:", err);
+    }
+  } else if (quotaStatus) {
+    try {
+      await incrementQuota(userId);
+    } catch (err) {
+      console.error("[planning] incrementQuota error:", err);
+    }
   }
 
   // 6. Sauvegarde historique — best-effort, fire-and-forget
@@ -186,13 +214,21 @@ export async function POST(req: NextRequest) {
   });
 
   // 7. Réponse
+  if (isFreeGeneration) {
+    return NextResponse.json({
+      data,
+      isFree: true,
+      freeRemaining: Math.max(0, freeRemainingAfter),
+    });
+  }
+
   return NextResponse.json({
     data,
     quota: {
-      used: quotaStatus.used + 1,
-      limit: quotaStatus.limit,
-      remaining: Math.max(0, quotaStatus.remaining - 1),
-      resetAt: quotaStatus.resetAt,
+      used: quotaStatus!.used + 1,
+      limit: quotaStatus!.limit,
+      remaining: Math.max(0, quotaStatus!.remaining - 1),
+      resetAt: quotaStatus!.resetAt,
     },
   });
 }

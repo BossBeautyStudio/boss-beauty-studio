@@ -10,10 +10,10 @@
 // Étape 3 : Résultat avec copy buttons + paywall si essai gratuit
 // ============================================================
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { POST_TYPES, type PostOutput } from "@/lib/prompts";
-import { CopyButton, PaywallBanner } from "@/components/dashboard/FreePaywall";
+import { FreeTrialBanner, CopyButton, PaywallBanner } from "@/components/dashboard/FreePaywall";
 
 const TONE_OPTIONS = [
   "Chaleureux et proche",
@@ -179,10 +179,14 @@ function PostForm({
   selectedType,
   onBack,
   onResult,
+  isFree,
+  freeRemaining,
 }: {
   selectedType: (typeof POST_TYPES)[number];
   onBack: () => void;
   onResult: (data: PostOutput, isFree: boolean, freeRemaining: number) => void;
+  isFree: boolean;
+  freeRemaining: number;
 }) {
   const router = useRouter();
 
@@ -273,6 +277,14 @@ function PostForm({
           </div>
         </div>
       </div>
+
+      {/* Bandeau essai gratuit */}
+      {isFree && <FreeTrialBanner freeRemaining={freeRemaining} />}
+
+      {/* Paywall si quota épuisé avant même de soumettre */}
+      {isFree && freeRemaining <= 0 && (
+        <PaywallBanner freeRemaining={0} />
+      )}
 
       <div className="card" style={{ maxWidth: "520px" }}>
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -603,6 +615,19 @@ export default function PostPage() {
   const [isFree, setIsFree] = useState(false);
   const [freeRemaining, setFreeRemaining] = useState(0);
 
+  // Charger le statut de quota au montage
+  useEffect(() => {
+    fetch("/api/user/quota")
+      .then((r) => r.json())
+      .then((body) => {
+        if (body.isSubscriber === false) {
+          setIsFree(true);
+          setFreeRemaining(body.freeRemaining ?? 0);
+        }
+      })
+      .catch(() => {/* silently ignore */});
+  }, []);
+
   function handleTypeSelect(type: (typeof POST_TYPES)[number]) {
     setSelectedType(type);
   }
@@ -643,6 +668,8 @@ export default function PostPage() {
           selectedType={selectedType}
           onBack={() => setStep("type")}
           onResult={handleResult}
+          isFree={isFree}
+          freeRemaining={freeRemaining}
         />
       )}
 
