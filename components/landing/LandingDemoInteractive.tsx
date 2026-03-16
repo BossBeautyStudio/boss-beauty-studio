@@ -10,7 +10,9 @@
 
 import { useState, useEffect } from "react";
 
-const CHECKOUT_URL = process.env.NEXT_PUBLIC_CHECKOUT_URL ?? "/login";
+// Funnel : landing → /login → dashboard (3 essais gratuits) → paywall → Stripe
+// Ne jamais pointer vers Stripe depuis la landing.
+const FREE_ENTRY_URL = "/login";
 const DEMO_STORAGE_KEY = "bbs_demo_used";
 
 const POST_TYPES_DEMO = [
@@ -313,11 +315,11 @@ export default function LandingDemoInteractive() {
                     {copied ? "✓ Copié !" : "Copier le post"}
                   </button>
                   <a
-                    href={CHECKOUT_URL}
+                    href={FREE_ENTRY_URL}
                     className="btn btn-primary"
                     style={{ fontSize: "0.9375rem" }}
                   >
-                    Générer mes 30 posts →
+                    Créer mon accès gratuit →
                   </a>
                 </div>
 
@@ -347,11 +349,11 @@ export default function LandingDemoInteractive() {
               un planning complet de 30 posts en 15 secondes.
             </p>
             <a
-              href={CHECKOUT_URL}
+              href={FREE_ENTRY_URL}
               className="btn btn-primary"
               style={{ fontSize: "1rem", padding: "0.75rem 1.75rem" }}
             >
-              Commencer pour 29€/mois →
+              Essayer gratuitement →
             </a>
           </div>
         )}

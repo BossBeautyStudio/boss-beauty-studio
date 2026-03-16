@@ -10,7 +10,9 @@ import Image from "next/image";
 import Link from "next/link";
 import LandingDemoInteractive from "@/components/landing/LandingDemoInteractive";
 
-const CHECKOUT_URL = process.env.NEXT_PUBLIC_CHECKOUT_URL ?? "/login";
+// Toutes les CTAs landing pointent vers l'accès gratuit.
+// Stripe est déclenché depuis le paywall dans le dashboard, pas ici.
+const FREE_ENTRY_URL = "/login";
 
 // ── Avis clients ───────────────────────────────────────────
 
@@ -129,11 +131,11 @@ export default function LandingPage() {
               Se connecter
             </Link>
             <a
-              href={CHECKOUT_URL}
+              href={FREE_ENTRY_URL}
               className="btn btn-primary"
               style={{ fontSize: "0.875rem", padding: "0.45rem 1rem" }}
             >
-              Commencer →
+              Essayer gratuitement
             </a>
           </div>
         </div>
@@ -192,11 +194,11 @@ export default function LandingPage() {
             {/* CTA principal */}
             <div>
               <a
-                href={CHECKOUT_URL}
+                href={FREE_ENTRY_URL}
                 className="btn btn-primary w-full sm:w-auto"
                 style={{ fontSize: "1rem", padding: "0.8rem 1.75rem", display: "flex", justifyContent: "center" }}
               >
-                Commencer maintenant →
+                Essayer gratuitement →
               </a>
             </div>
 
@@ -205,9 +207,9 @@ export default function LandingPage() {
               className="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 lg:justify-start"
             >
               {[
-                "✓ Résultats en 15 secondes",
+                "✓ 3 générations gratuites",
                 "✓ Aucune compétence requise",
-                "✓ Annulation en 1 clic",
+                "✓ Sans carte bancaire",
               ].map((item) => (
                 <span
                   key={item}
@@ -514,7 +516,7 @@ export default function LandingPage() {
         style={{ borderBottom: "1px solid var(--border)" }}
       >
         <a
-          href={CHECKOUT_URL}
+          href={FREE_ENTRY_URL}
           className="btn btn-primary"
           style={{
             width: "100%",
@@ -524,10 +526,10 @@ export default function LandingPage() {
             padding: "0.8rem 1.5rem",
           }}
         >
-          Commencer maintenant →
+          Essayer gratuitement →
         </a>
         <p className="mt-2 text-center text-xs" style={{ color: "var(--text-muted)" }}>
-          Résultats en 15 secondes · Annulation en 1 clic
+          3 générations gratuites · Sans carte bancaire
         </p>
       </div>
 
@@ -598,11 +600,11 @@ export default function LandingPage() {
             </ul>
 
             <a
-              href={CHECKOUT_URL}
+              href={FREE_ENTRY_URL}
               className="btn btn-primary mt-8 w-full sm:w-fit"
               style={{ fontSize: "0.9375rem", padding: "0.75rem 1.5rem", display: "flex", justifyContent: "center" }}
             >
-              Essayer maintenant →
+              Essayer gratuitement →
             </a>
           </div>
 
@@ -820,7 +822,7 @@ export default function LandingPage() {
             </ul>
 
             <a
-              href={CHECKOUT_URL}
+              href={FREE_ENTRY_URL}
               className="btn btn-primary"
               style={{
                 width: "100%",
@@ -829,14 +831,14 @@ export default function LandingPage() {
                 display: "flex",
               }}
             >
-              Commencer pour 29€/mois →
+              Commencer — 3 essais gratuits →
             </a>
 
             <p
               className="mt-3 text-center text-xs"
               style={{ color: "var(--text-muted)" }}
             >
-              Paiement sécurisé · Annulation en 1 clic
+              Sans carte bancaire · Puis 29€/mois · Annulation en 1 clic
             </p>
           </div>
         </div>
@@ -923,14 +925,14 @@ export default function LandingPage() {
             et remplissent leur agenda.
           </p>
           <a
-            href={CHECKOUT_URL}
+            href={FREE_ENTRY_URL}
             className="btn btn-primary w-full sm:w-auto"
             style={{ fontSize: "1.0625rem", padding: "0.85rem 2rem", display: "flex", justifyContent: "center" }}
           >
-            Commencer pour 29€/mois →
+            Essayer gratuitement →
           </a>
           <p className="mt-4 text-xs" style={{ color: "var(--text-muted)" }}>
-            Aucune carte bancaire requise pour l&apos;essai · Accès immédiat
+            3 générations gratuites · Sans carte bancaire · Accès immédiat
           </p>
         </div>
       </section>
@@ -948,7 +950,7 @@ export default function LandingPage() {
         }}
       >
         <a
-          href={CHECKOUT_URL}
+          href={FREE_ENTRY_URL}
           className="btn btn-primary"
           style={{
             width: "100%",
@@ -959,7 +961,7 @@ export default function LandingPage() {
             padding: "0.75rem 1.5rem",
           }}
         >
-          Commencer pour 29€/mois →
+          Essayer gratuitement →
         </a>
       </div>
 
