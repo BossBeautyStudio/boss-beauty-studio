@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { PostHogProvider } from "@/components/PostHogProvider";
 
 export const metadata: Metadata = {
   title: "Boss Beauty Studio",
@@ -28,7 +29,7 @@ export default function RootLayout({
         className="min-h-screen antialiased"
         style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}
       >
-        {children}
+        <PostHogProvider>{children}</PostHogProvider>
       </body>
     </html>
   );

@@ -14,7 +14,8 @@
 // isFree=true && freeRemaining === 0 → clic ouvre la modal paywall.
 // ============================================================
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import posthog from "posthog-js";
 
 const CHECKOUT_URL = process.env.NEXT_PUBLIC_CHECKOUT_URL ?? "/login";
 
@@ -192,6 +193,7 @@ export function CopyButton({
 
   function handleClick() {
     if (isBlocked) {
+      posthog.capture("paywall_shown", { source: "copy_block" });
       setShowPaywall(true);
       return;
     }
@@ -248,6 +250,13 @@ interface PaywallBannerProps {
 }
 
 export function PaywallBanner({ freeRemaining }: PaywallBannerProps) {
+  // Capture PostHog une seule fois quand la bannière paywall dure s'affiche
+  useEffect(() => {
+    if (freeRemaining === 0) {
+      posthog.capture("paywall_shown", { source: "result_banner" });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (freeRemaining > 0) {
     return (
       <div

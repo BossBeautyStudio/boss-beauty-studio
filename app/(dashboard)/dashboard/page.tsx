@@ -8,6 +8,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { checkQuota, FREE_LIMIT } from "@/lib/quota";
+import { PostHogInstallTest } from "@/components/dashboard/PostHogInstallTest";
 
 const MODULES = [
   {
@@ -334,6 +335,9 @@ export default async function DashboardPage() {
           </Link>
         ))}
       </div>
+
+      {/* PostHog — événement de validation d'installation (peut être retiré après confirmation) */}
+      <PostHogInstallTest />
     </div>
   );
 }

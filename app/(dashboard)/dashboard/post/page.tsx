@@ -12,6 +12,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import posthog from "posthog-js";
 import { POST_TYPES, type PostOutput } from "@/lib/prompts";
 import { FreeTrialBanner, CopyButton, PaywallBanner } from "@/components/dashboard/FreePaywall";
 
@@ -642,6 +643,7 @@ export default function PostPage() {
     freeRem: number
   ) {
     setResult(data);
+    posthog.capture("generate_post", { module: "post" });
     setIsFree(free);
     setFreeRemaining(freeRem);
     setStep("result");

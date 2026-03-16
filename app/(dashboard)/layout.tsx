@@ -13,6 +13,8 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { checkQuota } from "@/lib/quota";
 import { SidebarNav } from "@/components/sidebar-nav";
+import { FeedbackButton } from "@/components/dashboard/FeedbackButton";
+import { MobileNav } from "@/components/dashboard/MobileNav";
 
 export default async function DashboardLayout({
   children,
@@ -46,9 +48,9 @@ export default async function DashboardLayout({
       }}
     >
 
-      {/* ── Sidebar ─────────────────────────────────────────── */}
+      {/* ── Sidebar (masquée sur mobile, visible sur desktop) ── */}
       <aside
-        className="flex w-[240px] shrink-0 flex-col"
+        className="hidden md:flex w-[240px] shrink-0 flex-col"
         style={{
           background: "linear-gradient(180deg, var(--surface) 0%, #FCFAF8 100%)",
           boxShadow: "1px 0 0 var(--border), 4px 0 20px rgba(0, 0, 0, 0.04)",
@@ -134,12 +136,22 @@ export default async function DashboardLayout({
         </div>
       </aside>
 
-      {/* ── Contenu principal ───────────────────────────────── */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-3xl px-8 py-10">
-          {children}
-        </div>
-      </main>
+      {/* ── Zone droite : header mobile + contenu principal ──── */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+
+        {/* Header mobile avec hamburger (masqué sur desktop) */}
+        <MobileNav userEmail={user.email ?? ""} />
+
+        {/* Contenu principal */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="mx-auto max-w-3xl px-4 py-6 md:px-8 md:py-10">
+            {children}
+          </div>
+        </main>
+      </div>
+
+      {/* ── Feedback button (fixed bottom-right) ────────────── */}
+      <FeedbackButton userEmail={user.email ?? ""} />
 
     </div>
   );

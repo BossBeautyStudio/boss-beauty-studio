@@ -8,6 +8,7 @@
 // ============================================================
 
 import { useState, useEffect } from "react";
+import posthog from "posthog-js";
 import { useRouter } from "next/navigation";
 import { FreeTrialBanner, PaywallBanner } from "@/components/dashboard/FreePaywall";
 
@@ -163,6 +164,7 @@ export default function PlanningPage() {
       }
 
       setResult(body.data);
+      posthog.capture("generate_post", { module: "planning" });
       if (body.isFree) {
         setIsFree(true);
         setFreeRemaining(body.freeRemaining ?? 0);

@@ -8,6 +8,7 @@
 // ============================================================
 
 import { useState, useEffect } from "react";
+import posthog from "posthog-js";
 import { useRouter } from "next/navigation";
 import { FreeTrialBanner, CopyButton, PaywallBanner } from "@/components/dashboard/FreePaywall";
 
@@ -110,6 +111,7 @@ export default function DmPage() {
       }
 
       setResult(body.data);
+      posthog.capture("generate_post", { module: "dm" });
       if (body.isFree) {
         setIsFree(true);
         setFreeRemaining(body.freeRemaining ?? 0);

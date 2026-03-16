@@ -25,6 +25,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import posthog from "posthog-js";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -66,7 +67,7 @@ export default function AuthCallbackPage() {
 
     supabase.auth
       .exchangeCodeForSession(code)
-      .then(({ error }) => {
+      .then(({ data, error }) => {
         if (error) {
           console.error(
             "[auth/callback] exchangeCodeForSession error:",
@@ -79,6 +80,17 @@ export default function AuthCallbackPage() {
               : "auth_error";
           router.replace(`/login?error=${errorParam}`);
         } else {
+          // ── PostHog : détecter un nouvel utilisateur ──────────
+          // created_at < 30s → premier magic link → signup réel
+          if (data?.user) {
+            const createdAt = new Date(data.user.created_at).getTime();
+            const isNewUser = Date.now() - createdAt < 30_000;
+            if (isNewUser) {
+              posthog.capture("user_signup", {
+                email: data.user.email,
+              });
+            }
+          }
           // Session stockée en cookies par createBrowserClient
           // → lisible par createServerClient dans les Server Components
           router.replace(safeNext);

@@ -13,6 +13,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { stripeRequest, type StripeCheckoutSession } from "@/lib/stripe";
+import { MerciTracker } from "@/components/MerciTracker";
 
 export const dynamic = "force-dynamic";
 
@@ -172,6 +173,9 @@ export default async function MerciPage({
           ✨ Boss Beauty Studio · Paiement sécurisé par Stripe
         </p>
       </div>
+
+      {/* PostHog — subscription_started */}
+      <MerciTracker />
     </div>
   );
 }
