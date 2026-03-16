@@ -901,7 +901,104 @@ export default function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════════
-          10 — CTA FINAL
+          10 — PROGRAMME PARTENAIRE
+      ══════════════════════════════════════════════════════ */}
+      <section
+        className="px-5 py-14 sm:py-20"
+        style={{
+          backgroundColor: "var(--surface)",
+          borderBottom: "1px solid var(--border)",
+        }}
+      >
+        <div
+          className="mx-auto flex flex-col items-center gap-8 lg:flex-row lg:items-center lg:gap-16"
+          style={{ maxWidth: "900px" }}
+        >
+          {/* Texte */}
+          <div className="flex-1 text-center lg:text-left">
+            <div
+              className="mb-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold"
+              style={{
+                backgroundColor: "var(--surface-alt)",
+                border: "1px solid var(--border)",
+                color: "var(--accent)",
+              }}
+            >
+              ✦ Programme partenaire
+            </div>
+
+            <h2
+              className="mb-3 text-2xl font-semibold leading-snug sm:text-3xl"
+              style={{ color: "var(--text)" }}
+            >
+              Gagne{" "}
+              <span style={{ color: "var(--accent)" }}>30 % récurrent</span>{" "}
+              en recommandant Boss Beauty Studio
+            </h2>
+
+            <p
+              className="mb-6 text-sm leading-relaxed"
+              style={{ color: "var(--text-muted)", maxWidth: "420px", margin: "0 auto 1.5rem" }}
+            >
+              Tu es lash artist, formatrice, esthéticienne ou créatrice beauté ?
+              Partage l&apos;outil à ta communauté et touche une commission mensuelle
+              récurrente — sans contrainte de volume.
+            </p>
+
+            <div className="flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
+              <Link
+                href="/programme-partenaire"
+                className="btn btn-primary"
+                style={{ fontSize: "0.9375rem", padding: "0.7rem 1.5rem" }}
+              >
+                Devenir partenaire →
+              </Link>
+              <Link
+                href="/programme-partenaire"
+                className="text-sm font-medium"
+                style={{ color: "var(--text-muted)" }}
+              >
+                Voir les détails
+              </Link>
+            </div>
+          </div>
+
+          {/* Carte chiffre */}
+          <div
+            className="w-full shrink-0 rounded-[20px] px-8 py-7 text-center lg:w-[240px]"
+            style={{
+              backgroundColor: "var(--bg)",
+              border: "2px solid var(--accent)",
+              boxShadow: "0 8px 32px rgba(181,122,140,0.12)",
+            }}
+          >
+            <p
+              className="text-5xl font-semibold"
+              style={{ color: "var(--accent)" }}
+            >
+              30 %
+            </p>
+            <p
+              className="mt-1 text-sm font-medium"
+              style={{ color: "var(--text)" }}
+            >
+              de commission récurrente
+            </p>
+            <div
+              className="my-4 h-px w-full"
+              style={{ backgroundColor: "var(--border)" }}
+            />
+            <div className="flex flex-col gap-1.5 text-left text-xs" style={{ color: "var(--text-muted)" }}>
+              <span>✓ Accès gratuit à l&apos;outil</span>
+              <span>✓ Partenariat durable</span>
+              <span>✓ 2 vidéos UGC au départ</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════════════
+          11 — CTA FINAL
       ══════════════════════════════════════════════════════ */}
       <section
         className="px-5 py-16 sm:py-24 text-center"
@@ -983,13 +1080,22 @@ export default function LandingPage() {
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>
             © 2025 Boss Beauty Studio · Tous droits réservés
           </p>
-          <Link
-            href="/login"
-            className="text-xs font-medium"
-            style={{ color: "var(--accent)" }}
-          >
-            Se connecter →
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/programme-partenaire"
+              className="text-xs font-medium"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Programme partenaire
+            </Link>
+            <Link
+              href="/login"
+              className="text-xs font-medium"
+              style={{ color: "var(--accent)" }}
+            >
+              Se connecter →
+            </Link>
+          </div>
         </div>
       </footer>
     </div>
