@@ -16,6 +16,7 @@ import posthog from "posthog-js";
 import { POST_TYPES, type PostOutput } from "@/lib/prompts";
 import { FreeTrialBanner, CopyButton, PaywallBanner } from "@/components/dashboard/FreePaywall";
 import { WhatsAppCTA } from "@/components/dashboard/WhatsAppCTA";
+import { SaveButton } from "@/components/dashboard/SaveButton";
 
 // ── Types partagés ────────────────────────────────────────────────────────────
 
@@ -494,6 +495,7 @@ function PostResult({
   onReset,
   onRegenerate,
   regenerating,
+  params,
 }: {
   result: PostOutput;
   selectedType: (typeof POST_TYPES)[number];
@@ -502,6 +504,7 @@ function PostResult({
   onReset: () => void;
   onRegenerate: () => void;
   regenerating: boolean;
+  params: PostParams | null;
 }) {
   // ── Inline editing state ──────────────────────────────────────────────────
   const [editedCaption, setEditedCaption] = useState(result.caption);
@@ -650,7 +653,7 @@ function PostResult({
             freeRemaining={freeRemaining}
           />
 
-          {/* Barre d'actions — modifier / régénérer */}
+          {/* Barre d'actions — modifier / régénérer / sauvegarder */}
           <div
             className="mt-3 flex flex-wrap gap-2"
             style={{ borderTop: "1px solid var(--border)", paddingTop: "0.75rem" }}
@@ -672,6 +675,18 @@ function PostResult({
             >
               {regenerating ? "⏳ Régénération…" : "🔄 Régénérer"}
             </button>
+            <SaveButton
+              module="post"
+              title={`Post ${selectedType.label}${params?.specialite ? ` — ${params.specialite}` : ""}`}
+              content={{
+                hook: editedHook,
+                caption: editedCaption,
+                hashtags: result.hashtags,
+                ideeStory: result.ideeStory,
+                ideeReel: result.ideeReel ?? null,
+              }}
+              params={params ? (params as unknown as Record<string, unknown>) : undefined}
+            />
           </div>
         </div>
 
@@ -946,6 +961,7 @@ export default function PostPage() {
           onReset={handleReset}
           onRegenerate={handleRegenerate}
           regenerating={regenerating}
+          params={lastParams}
         />
       )}
     </div>

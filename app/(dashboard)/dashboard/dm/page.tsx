@@ -12,6 +12,7 @@ import posthog from "posthog-js";
 import { useRouter } from "next/navigation";
 import { FreeTrialBanner, CopyButton, PaywallBanner } from "@/components/dashboard/FreePaywall";
 import { WhatsAppCTA } from "@/components/dashboard/WhatsAppCTA";
+import { SaveButton } from "@/components/dashboard/SaveButton";
 
 interface DmVariante {
   courte: string;
@@ -429,6 +430,19 @@ export default function DmPage() {
               freeRemaining={freeRemaining}
               onRegenerate={handleRegenerate}
               regenerating={regenerating}
+            />
+          </div>
+
+          {/* Barre d'actions globale — sauvegarder */}
+          <div
+            className="mt-4 flex flex-wrap items-center gap-2"
+            style={{ borderTop: "1px solid var(--border)", paddingTop: "0.75rem" }}
+          >
+            <SaveButton
+              module="dm"
+              title={`Réponse DM${specialite ? ` — ${specialite}` : ""}`}
+              content={{ courte: result.courte, standard: result.standard, premium: result.premium }}
+              params={{ messageClient, specialite, contexte: contexte || undefined }}
             />
           </div>
 

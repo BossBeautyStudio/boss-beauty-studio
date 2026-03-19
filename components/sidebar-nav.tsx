@@ -56,6 +56,15 @@ const NAV_ITEMS = [
     ),
   },
   {
+    label: "Mes créations",
+    href: "/dashboard/library",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+      </svg>
+    ),
+  },
+  {
     label: "Historique",
     href: "/dashboard/history",
     icon: (

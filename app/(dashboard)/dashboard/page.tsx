@@ -137,6 +137,28 @@ const MODULES: Array<{
       </svg>
     ),
   },
+  {
+    href: "/dashboard/library",
+    title: "Mes créations",
+    description:
+      "Retrouve tous les contenus que tu as sauvegardés — posts, carrousels, accroches, réponses DM — en un seul endroit.",
+    badge: "Bibliothèque · Accès rapide",
+    cta: "Voir ma bibliothèque",
+    icon: (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+      </svg>
+    ),
+  },
 ];
 
 export default async function DashboardPage() {

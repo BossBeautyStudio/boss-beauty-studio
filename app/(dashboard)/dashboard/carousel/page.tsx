@@ -12,6 +12,7 @@ import posthog from "posthog-js";
 import { useRouter } from "next/navigation";
 import { FreeTrialBanner, CopyButton, PaywallBanner } from "@/components/dashboard/FreePaywall";
 import { WhatsAppCTA } from "@/components/dashboard/WhatsAppCTA";
+import { SaveButton } from "@/components/dashboard/SaveButton";
 
 interface CarouselSlide {
   numero: number;
@@ -619,6 +620,18 @@ export default function CarouselPage() {
               >
                 {regenerating ? "⏳ Régénération…" : "🔄 Régénérer"}
               </button>
+              <SaveButton
+                module="carousel"
+                title={`Carrousel "${result.titre}"${specialite ? ` — ${specialite}` : ""}`}
+                content={{
+                  titre: result.titre,
+                  slides: result.slides,
+                  caption: editedCaption || result.caption,
+                  hashtags: result.hashtags,
+                  cta: result.cta,
+                }}
+                params={{ sujet, specialite, nombreSlides, tonStyle, publicCible: publicCible || undefined }}
+              />
             </div>
 
             <div className="mb-1 flex items-center justify-between gap-4">
