@@ -17,6 +17,7 @@ import { POST_TYPES, type PostOutput } from "@/lib/prompts";
 import { FreeTrialBanner, CopyButton, PaywallBanner } from "@/components/dashboard/FreePaywall";
 import { WhatsAppCTA } from "@/components/dashboard/WhatsAppCTA";
 import { SaveButton } from "@/components/dashboard/SaveButton";
+import { useBrandProfile } from "@/hooks/useBrandProfile";
 
 // ── Types partagés ────────────────────────────────────────────────────────────
 
@@ -264,12 +265,23 @@ function PostForm({
   freeRemaining: number;
 }) {
   const router = useRouter();
+  const { profile } = useBrandProfile();
 
   const [specialite, setSpecialite] = useState("");
   const [tonStyle, setTonStyle] = useState(TONE_OPTIONS[0]);
   const [contexte, setContexte] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Pré-remplissage depuis le profil de marque
+  useEffect(() => {
+    if (!profile) return;
+    if (profile.specialite) setSpecialite((prev) => prev || profile.specialite!);
+    if (profile.ton_style) {
+      const match = TONE_OPTIONS.find((t) => t === profile.ton_style);
+      if (match) setTonStyle(match);
+    }
+  }, [profile]);
 
   // Pré-remplissage depuis URL params (venant d'un autre module)
   useEffect(() => {

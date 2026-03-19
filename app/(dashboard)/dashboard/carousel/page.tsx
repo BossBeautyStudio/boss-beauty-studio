@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { FreeTrialBanner, CopyButton, PaywallBanner } from "@/components/dashboard/FreePaywall";
 import { WhatsAppCTA } from "@/components/dashboard/WhatsAppCTA";
 import { SaveButton } from "@/components/dashboard/SaveButton";
+import { useBrandProfile } from "@/hooks/useBrandProfile";
 
 interface CarouselSlide {
   numero: number;
@@ -199,6 +200,7 @@ function getCtaKeyword(specialite: string): string {
 
 export default function CarouselPage() {
   const router = useRouter();
+  const { profile } = useBrandProfile();
 
   const [sujet, setSujet] = useState("");
   const [specialite, setSpecialite] = useState("");
@@ -222,6 +224,17 @@ export default function CarouselPage() {
   const [conseil] = useState<string>(
     () => CONSEILS_CAROUSEL[Math.floor(Math.random() * CONSEILS_CAROUSEL.length)]
   );
+
+  // Pré-remplissage depuis le profil de marque
+  useEffect(() => {
+    if (!profile) return;
+    if (profile.specialite) setSpecialite((prev) => prev || profile.specialite!);
+    if (profile.public_cible) setPublicCible((prev) => prev || profile.public_cible!);
+    if (profile.ton_style) {
+      const match = TONE_OPTIONS.find((t) => t === profile.ton_style);
+      if (match) setTonStyle(match);
+    }
+  }, [profile]);
 
   // Pré-remplissage depuis URL params (venant d'un autre module)
   useEffect(() => {

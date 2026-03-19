@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { FreeTrialBanner, CopyButton, PaywallBanner } from "@/components/dashboard/FreePaywall";
 import { WhatsAppCTA } from "@/components/dashboard/WhatsAppCTA";
 import { SaveButton } from "@/components/dashboard/SaveButton";
+import { useBrandProfile } from "@/hooks/useBrandProfile";
 
 interface HookItem {
   numero: number;
@@ -228,6 +229,7 @@ function getCtaKeyword(specialite: string): string {
 
 export default function HooksPage() {
   const router = useRouter();
+  const { profile } = useBrandProfile();
 
   const [specialite, setSpecialite] = useState("");
   const [typeContenu, setTypeContenu] = useState(TYPE_OPTIONS[0]);
@@ -250,6 +252,16 @@ export default function HooksPage() {
 
   // Contexte importé depuis un autre module (ex: planning)
   const [importedSujet, setImportedSujet] = useState<string | null>(null);
+
+  // Pré-remplissage depuis le profil de marque
+  useEffect(() => {
+    if (!profile) return;
+    if (profile.specialite) setSpecialite((prev) => prev || profile.specialite!);
+    if (profile.ton_style) {
+      const match = TONE_OPTIONS.find((t) => t === profile.ton_style);
+      if (match) setTonStyle(match);
+    }
+  }, [profile]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

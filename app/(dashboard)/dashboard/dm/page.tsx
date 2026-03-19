@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { FreeTrialBanner, CopyButton, PaywallBanner } from "@/components/dashboard/FreePaywall";
 import { WhatsAppCTA } from "@/components/dashboard/WhatsAppCTA";
 import { SaveButton } from "@/components/dashboard/SaveButton";
+import { useBrandProfile } from "@/hooks/useBrandProfile";
 
 interface DmVariante {
   courte: string;
@@ -49,6 +50,7 @@ const CONSEILS_DM = [
 
 export default function DmPage() {
   const router = useRouter();
+  const { profile } = useBrandProfile();
 
   const [messageClient, setMessageClient] = useState("");
   const [specialite, setSpecialite] = useState("");
@@ -68,6 +70,12 @@ export default function DmPage() {
   const [conseil] = useState<string>(
     () => CONSEILS_DM[Math.floor(Math.random() * CONSEILS_DM.length)]
   );
+
+  // Pré-remplissage depuis le profil de marque
+  useEffect(() => {
+    if (!profile) return;
+    if (profile.specialite) setSpecialite((prev) => prev || profile.specialite!);
+  }, [profile]);
 
   // Charger le statut de quota au montage
   useEffect(() => {
