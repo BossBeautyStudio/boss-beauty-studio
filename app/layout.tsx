@@ -2,6 +2,7 @@ import { Analytics } from "@vercel/analytics/next"
 import type { Metadata } from "next";
 import "./globals.css";
 import { PostHogProvider } from "@/components/PostHogProvider";
+import { SupabaseErrorRedirect } from "@/components/SupabaseErrorRedirect";
 
 export const metadata: Metadata = {
   title: "Boss Beauty Studio",
@@ -30,6 +31,7 @@ export default function RootLayout({
         className="min-h-screen antialiased"
         style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}
       >
+        <SupabaseErrorRedirect />
         <PostHogProvider>{children}</PostHogProvider>
       </body>
     </html>

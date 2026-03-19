@@ -17,7 +17,7 @@ import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/server";
-import { FREE_LIMIT } from "@/lib/quota";
+import { FREE_LIMIT, MONTHLY_LIMIT } from "@/lib/quota";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +55,7 @@ export async function GET() {
 
     if (isSubscriber) {
       const used = data.quota_used ?? 0;
-      const limit = data.quota_monthly ?? 30;
+      const limit = data.quota_monthly ?? MONTHLY_LIMIT;
       return NextResponse.json({
         isSubscriber: true,
         quota: {

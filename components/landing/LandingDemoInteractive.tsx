@@ -10,7 +10,7 @@
 
 import { useState, useEffect } from "react";
 
-// Funnel : landing → /login → dashboard (3 essais gratuits) → paywall → Stripe
+// Funnel : landing → /login → dashboard (2 essais gratuits) → paywall → Stripe
 // Ne jamais pointer vers Stripe depuis la landing.
 const FREE_ENTRY_URL = "/login";
 const DEMO_STORAGE_KEY = "bbs_demo_used";
@@ -346,7 +346,7 @@ export default function LandingDemoInteractive() {
               style={{ color: "var(--text-muted)" }}
             >
               Tu as vu ce que Boss Beauty Studio peut faire. Le vrai outil génère
-              un planning complet de 30 posts en 15 secondes.
+              un planning de 7 posts pour la semaine en quelques secondes.
             </p>
             <a
               href={FREE_ENTRY_URL}

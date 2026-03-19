@@ -9,8 +9,43 @@ import { redirect } from "next/navigation";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { checkQuota, FREE_LIMIT } from "@/lib/quota";
 import { PostHogInstallTest } from "@/components/dashboard/PostHogInstallTest";
+import { OnboardingBanner } from "@/components/dashboard/OnboardingBanner";
 
-const MODULES = [
+const MODULES: Array<{
+  href: string;
+  title: string;
+  description: string;
+  badge: string;
+  cta: string;
+  recommended?: boolean;
+  icon: React.ReactNode;
+}> = [
+  {
+    href: "/dashboard/planning",
+    title: "Planning Instagram",
+    description:
+      "7 posts par semaine — thèmes, formats et idées — pour ne plus jamais manquer d'inspiration.",
+    badge: "7 posts · ~5 sec",
+    cta: "Générer mon planning",
+    recommended: true,
+    icon: (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <rect x="3" y="4" width="18" height="18" rx="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+      </svg>
+    ),
+  },
   {
     href: "/dashboard/post",
     title: "Post Instagram",
@@ -31,31 +66,6 @@ const MODULES = [
       >
         <rect x="3" y="3" width="18" height="18" rx="3" />
         <path d="M8 12h8M12 8v8" />
-      </svg>
-    ),
-  },
-  {
-    href: "/dashboard/planning",
-    title: "Planning Instagram",
-    description:
-      "30 posts clé-en-main — caption, hashtags, Story et Reel — pour ne plus jamais manquer d'inspiration.",
-    badge: "30 posts · ~15 sec",
-    cta: "Générer mon planning",
-    icon: (
-      <svg
-        width="22"
-        height="22"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <rect x="3" y="4" width="18" height="18" rx="2" />
-        <line x1="16" y1="2" x2="16" y2="6" />
-        <line x1="8" y1="2" x2="8" y2="6" />
-        <line x1="3" y1="10" x2="21" y2="10" />
       </svg>
     ),
   },
@@ -266,6 +276,9 @@ export default async function DashboardPage() {
         />
       </div>
 
+      {/* ── Bannière d'onboarding (première visite uniquement) ── */}
+      <OnboardingBanner />
+
       {/* ── Grille de modules ────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
         {MODULES.map((mod) => (
@@ -273,17 +286,39 @@ export default async function DashboardPage() {
             key={mod.href}
             href={mod.href}
             className="card card-link flex flex-col"
-            style={{ gap: "1.5rem" }}
+            style={{
+              gap: "1.5rem",
+              ...(mod.recommended
+                ? {
+                    border: "1.5px solid var(--accent)",
+                    boxShadow: "0 2px 16px rgba(181,122,140,0.13)",
+                  }
+                : {}),
+            }}
           >
-            {/* Icône — couleur accent */}
-            <div
-              className="flex h-11 w-11 items-center justify-center rounded-xl"
-              style={{
-                backgroundColor: "var(--surface-alt)",
-                color: "var(--accent)",
-              }}
-            >
-              {mod.icon}
+            {/* En-tête : icône + badge Recommandé */}
+            <div className="flex items-start justify-between gap-2">
+              <div
+                className="flex h-11 w-11 items-center justify-center rounded-xl"
+                style={{
+                  backgroundColor: "var(--surface-alt)",
+                  color: "var(--accent)",
+                }}
+              >
+                {mod.icon}
+              </div>
+              {mod.recommended && (
+                <span
+                  className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+                  style={{
+                    backgroundColor: "var(--accent)",
+                    color: "#fff",
+                    lineHeight: "1.6",
+                  }}
+                >
+                  ✨ Recommandé
+                </span>
+              )}
             </div>
 
             {/* Texte */}

@@ -2,7 +2,7 @@
 // app/api/generate/planning/route.ts
 //
 // POST /api/generate/planning
-// Génère un planning de contenu Instagram 30 jours via Claude.
+// Génère un planning de contenu Instagram hebdomadaire (7 jours) via Claude.
 //
 // Flow :
 //   1. Authentification     — 401 si absent
@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
       if (!freeStatus.allowed) {
         return NextResponse.json(
           {
-            error: "Tu as utilisé tes 3 générations gratuites.",
+            error: "Tu as utilisé tes 2 générations gratuites.",
             paywallRequired: true,
             freeLimit: FREE_LIMIT,
           },

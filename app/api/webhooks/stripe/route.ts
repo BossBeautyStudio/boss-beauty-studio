@@ -27,6 +27,7 @@
 
 import { NextResponse, type NextRequest } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { MONTHLY_LIMIT } from "@/lib/quota";
 import {
   verifyStripeWebhook,
   mapStripeSubscriptionStatus,
@@ -127,7 +128,7 @@ async function activateUser(
     subscription_status: "active",
     stripe_customer_id: stripeCustomerId,
     stripe_subscription_id: stripeSubscriptionId,
-    quota_monthly: 30,
+    quota_monthly: MONTHLY_LIMIT,
   };
 
   if (currentPeriodEnd) {

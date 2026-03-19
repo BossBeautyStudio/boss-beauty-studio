@@ -30,6 +30,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { MONTHLY_LIMIT } from "@/lib/quota";
 
 export const dynamic = "force-dynamic";
 
@@ -176,7 +177,7 @@ export async function POST(req: NextRequest) {
   // 6. Activer le compte
   const updatePayload: Record<string, unknown> = {
     subscription_status: "active",
-    quota_monthly: 30,
+    quota_monthly: MONTHLY_LIMIT,
   };
 
   if (typeof orderId === "string" && orderId.length > 0) {

@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
       if (!freeStatus.allowed) {
         return NextResponse.json(
           {
-            error: "Tu as utilisé tes 3 générations gratuites.",
+            error: "Tu as utilisé tes 2 générations gratuites.",
             paywallRequired: true,
             freeLimit: FREE_LIMIT,
           },

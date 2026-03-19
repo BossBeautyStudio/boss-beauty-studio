@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import posthog from "posthog-js";
 import { useRouter } from "next/navigation";
 import { FreeTrialBanner, PaywallBanner } from "@/components/dashboard/FreePaywall";
+import { WhatsAppCTA } from "@/components/dashboard/WhatsAppCTA";
 
 interface PlanningPost {
   jour: number;
@@ -569,6 +570,9 @@ export default function PlanningPage() {
 
           {/* Bandeau paywall free trial */}
           {isFree && <PaywallBanner freeRemaining={freeRemaining} />}
+
+          {/* CTA WhatsApp — analyse personnalisée */}
+          <WhatsAppCTA />
         </div>
       )}
     </div>

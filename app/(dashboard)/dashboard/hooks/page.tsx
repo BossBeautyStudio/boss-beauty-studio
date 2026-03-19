@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import posthog from "posthog-js";
 import { useRouter } from "next/navigation";
 import { FreeTrialBanner, CopyButton, PaywallBanner } from "@/components/dashboard/FreePaywall";
+import { WhatsAppCTA } from "@/components/dashboard/WhatsAppCTA";
 
 interface HookItem {
   numero: number;
@@ -629,6 +630,9 @@ export default function HooksPage() {
 
           {/* Bandeau paywall free trial */}
           {isFree && <PaywallBanner freeRemaining={freeRemaining} />}
+
+          {/* CTA WhatsApp — analyse personnalisée */}
+          <WhatsAppCTA />
         </div>
       )}
     </div>

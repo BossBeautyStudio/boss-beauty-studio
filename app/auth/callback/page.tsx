@@ -100,9 +100,9 @@ export default function AuthCallbackPage() {
 
   // Écran de transition — visible ~200ms
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#FAF8F5]">
+    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: "var(--bg)" }}>
       <div className="text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#C9748F]">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl" style={{ backgroundColor: "var(--accent)" }}>
           <svg
             className="h-5 w-5 animate-spin text-white"
             xmlns="http://www.w3.org/2000/svg"

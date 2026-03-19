@@ -9,14 +9,47 @@
 //   isFree=false                 → aucun composant ne s'affiche.
 //   isFree=true, remaining > 0   → compteur discret + nudge doux post-résultat.
 //   isFree=true, remaining === 0 → paywall complet avec bénéfices + CTA fort.
+//
+// Améliorations V1 conversion :
+//   - Email pré-rempli dans l'URL checkout (useCheckoutUrl)
+//   - Ancrage prix "Moins qu'un café/semaine"
+//   - Avertissement contenu non sauvegardé (paywall épuisé)
+//   - Preuve sociale (témoignage) dans modal + banner
 // ============================================================
 
 import { useState, useEffect } from "react";
 import posthog from "posthog-js";
+import { createClient } from "@/lib/supabase/client";
 
-const CHECKOUT_URL = process.env.NEXT_PUBLIC_CHECKOUT_URL ?? "/login";
+const BASE_CHECKOUT_URL = process.env.NEXT_PUBLIC_CHECKOUT_URL ?? "/login";
 
-// ── Bénéfices produit ─────────────────────────────────────────────────────────
+// ── URL checkout avec email pré-rempli ────────────────────────────────────
+
+function buildCheckoutUrl(email?: string | null): string {
+  if (!email) return BASE_CHECKOUT_URL;
+  const sep = BASE_CHECKOUT_URL.includes("?") ? "&" : "?";
+  return `${BASE_CHECKOUT_URL}${sep}email=${encodeURIComponent(email)}`;
+}
+
+/**
+ * Récupère l'email de la session Supabase (cache navigateur) et construit
+ * l'URL checkout avec pré-remplissage. Commence par l'URL de base pour
+ * éviter tout flash côté serveur.
+ */
+function useCheckoutUrl(): string {
+  const [url, setUrl] = useState(BASE_CHECKOUT_URL);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setUrl(buildCheckoutUrl(data.user?.email));
+    });
+  }, []);
+
+  return url;
+}
+
+// ── Bénéfices produit ─────────────────────────────────────────────────────
 
 const BENEFITS = [
   "Des posts qui attirent des clientes — générés en 30 secondes",
@@ -24,9 +57,19 @@ const BENEFITS = [
   "Contenu 100 % adapté à ta spécialité beauté, prêt à copier-coller",
 ] as const;
 
-// ── Modal paywall ─────────────────────────────────────────────────────────────
+// ── Témoignage ────────────────────────────────────────────────────────────
+
+const TESTIMONIAL = {
+  quote:
+    "\"J'ai gagné au moins 3h par semaine sur mon contenu Instagram. Je recommande à toutes mes collègues.\"",
+  author: "Laura B., esthéticienne",
+};
+
+// ── Modal paywall ─────────────────────────────────────────────────────────
 
 function PaywallModal({ onClose }: { onClose: () => void }) {
+  const checkoutUrl = useCheckoutUrl();
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center px-4"
@@ -102,7 +145,7 @@ function PaywallModal({ onClose }: { onClose: () => void }) {
           style={{ borderTop: "1px solid var(--border)", paddingTop: "1.25rem" }}
         >
           <a
-            href={CHECKOUT_URL}
+            href={checkoutUrl}
             className="btn btn-primary"
             style={{
               width: "100%",
@@ -115,15 +158,31 @@ function PaywallModal({ onClose }: { onClose: () => void }) {
             Continuer à créer du contenu →
           </a>
           <p className="mt-2.5 text-center text-xs" style={{ color: "var(--text-muted)" }}>
-            29€/mois · Accès immédiat · Sans engagement
+            Moins qu&apos;un café/semaine · Accès immédiat · Sans engagement
           </p>
+
+          {/* Témoignage */}
+          <div
+            className="mt-4 rounded-[10px] px-4 py-3"
+            style={{
+              backgroundColor: "var(--surface-alt)",
+              border: "1px solid var(--border)",
+            }}
+          >
+            <p className="text-xs italic leading-relaxed" style={{ color: "var(--text-muted)" }}>
+              {TESTIMONIAL.quote}
+            </p>
+            <p className="mt-1.5 text-xs font-medium" style={{ color: "var(--accent)" }}>
+              — {TESTIMONIAL.author}
+            </p>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-// ── FreeTrialBanner — compteur discret ────────────────────────────────────────
+// ── FreeTrialBanner — compteur discret ────────────────────────────────────
 
 interface FreeTrialBannerProps {
   freeRemaining: number;
@@ -135,6 +194,8 @@ interface FreeTrialBannerProps {
  * Disparaît si freeRemaining <= 0 (PaywallBanner prend le relais côté résultats).
  */
 export function FreeTrialBanner({ freeRemaining }: FreeTrialBannerProps) {
+  const checkoutUrl = useCheckoutUrl();
+
   if (freeRemaining <= 0) return null;
 
   const isLast = freeRemaining === 1;
@@ -166,7 +227,7 @@ export function FreeTrialBanner({ freeRemaining }: FreeTrialBannerProps) {
         )}
       </p>
       <a
-        href={CHECKOUT_URL}
+        href={checkoutUrl}
         className="shrink-0 rounded-full px-3 py-1 text-xs font-semibold text-white transition-opacity hover:opacity-85"
         style={{ backgroundColor: "var(--accent)" }}
       >
@@ -176,7 +237,7 @@ export function FreeTrialBanner({ freeRemaining }: FreeTrialBannerProps) {
   );
 }
 
-// ── CopyButton avec logique paywall ──────────────────────────────────────────
+// ── CopyButton avec logique paywall ──────────────────────────────────────
 
 interface CopyButtonProps {
   text: string;
@@ -232,7 +293,7 @@ export function CopyButton({
   );
 }
 
-// ── PaywallBanner ─────────────────────────────────────────────────────────────
+// ── PaywallBanner ─────────────────────────────────────────────────────────
 
 interface PaywallBannerProps {
   freeRemaining: number;
@@ -245,6 +306,8 @@ interface PaywallBannerProps {
  * freeRemaining === 0 → Paywall complet avec bénéfices, transition émotionnelle, CTA fort
  */
 export function PaywallBanner({ freeRemaining }: PaywallBannerProps) {
+  const checkoutUrl = useCheckoutUrl();
+
   useEffect(() => {
     if (freeRemaining === 0) {
       posthog.capture("paywall_shown", { source: "result_banner" });
@@ -272,7 +335,7 @@ export function PaywallBanner({ freeRemaining }: PaywallBannerProps) {
           . Abonne-toi pour créer du contenu chaque semaine, sans jamais être bloquée.
         </p>
         <a
-          href={CHECKOUT_URL}
+          href={checkoutUrl}
           className="text-sm font-semibold"
           style={{ color: "var(--accent)" }}
         >
@@ -311,7 +374,7 @@ export function PaywallBanner({ freeRemaining }: PaywallBannerProps) {
         </p>
 
         {/* Bénéfices */}
-        <ul className="mb-5 flex flex-col gap-2.5">
+        <ul className="mb-4 flex flex-col gap-2.5">
           {BENEFITS.map((b) => (
             <li
               key={b}
@@ -329,9 +392,22 @@ export function PaywallBanner({ freeRemaining }: PaywallBannerProps) {
           ))}
         </ul>
 
+        {/* Avertissement : contenu non sauvegardé */}
+        <p
+          className="mb-5 rounded-[8px] px-3 py-2 text-xs"
+          style={{
+            color: "var(--text-muted)",
+            backgroundColor: "var(--surface-alt)",
+            border: "1px solid var(--border)",
+          }}
+        >
+          💾 Ton contenu n&apos;est pas sauvegardé — abonne-toi pour retrouver tes
+          générations à tout moment.
+        </p>
+
         {/* CTA */}
         <a
-          href={CHECKOUT_URL}
+          href={checkoutUrl}
           className="btn btn-primary"
           style={{
             display: "inline-flex",
@@ -342,8 +418,24 @@ export function PaywallBanner({ freeRemaining }: PaywallBannerProps) {
           Continuer à créer du contenu →
         </a>
         <p className="mt-2.5 text-xs" style={{ color: "var(--text-muted)" }}>
-          29€/mois · Accès immédiat · Annulation en 1 clic
+          Moins qu&apos;un café/semaine · Accès immédiat · Annulation en 1 clic
         </p>
+
+        {/* Témoignage */}
+        <div
+          className="mt-4 rounded-[10px] px-4 py-3"
+          style={{
+            backgroundColor: "var(--surface-alt)",
+            border: "1px solid var(--border)",
+          }}
+        >
+          <p className="text-xs italic leading-relaxed" style={{ color: "var(--text-muted)" }}>
+            {TESTIMONIAL.quote}
+          </p>
+          <p className="mt-1.5 text-xs font-medium" style={{ color: "var(--accent)" }}>
+            — {TESTIMONIAL.author}
+          </p>
+        </div>
       </div>
     </div>
   );

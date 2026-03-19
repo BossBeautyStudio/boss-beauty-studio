@@ -185,7 +185,7 @@ export async function incrementQuota(userId: string): Promise<void> {
 
 export interface FreeQuotaStatus {
   freeUsed: number;         // free_quota_used en base
-  freeLimit: number;        // = FREE_LIMIT (3)
+  freeLimit: number;        // = FREE_LIMIT (2)
   freeRemaining: number;    // freeLimit - freeUsed (min 0)
   allowed: boolean;         // freeUsed < freeLimit
 }

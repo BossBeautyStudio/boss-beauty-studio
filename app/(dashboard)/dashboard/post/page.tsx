@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import posthog from "posthog-js";
 import { POST_TYPES, type PostOutput } from "@/lib/prompts";
 import { FreeTrialBanner, CopyButton, PaywallBanner } from "@/components/dashboard/FreePaywall";
+import { WhatsAppCTA } from "@/components/dashboard/WhatsAppCTA";
 
 // ── Types partagés ────────────────────────────────────────────────────────────
 
@@ -832,6 +833,9 @@ function PostResult({
           </p>
         </div>
       )}
+
+      {/* CTA WhatsApp — analyse personnalisée */}
+      <WhatsAppCTA />
     </div>
   );
 }

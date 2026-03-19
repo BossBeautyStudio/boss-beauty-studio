@@ -54,7 +54,7 @@ const AVIS = [
 // ── Features pricing ───────────────────────────────────────
 
 const FEATURES_PRICING = [
-  "Planning Instagram — 30 posts complets",
+  "Planning Instagram — 7 posts par semaine",
   "Carrousel Instagram avec guide Canva",
   "Réponse DM — 3 variantes par message",
   "Accroches Instagram — 10 accroches percutantes",
@@ -83,7 +83,7 @@ const FAQ_ITEMS = [
   {
     question: "Combien de temps faut-il pour générer un planning ?",
     reponse:
-      "Entre 10 et 15 secondes. Tu saisis ta spécialité, tu cliques sur 'Générer', et tu obtiens 30 posts complets — caption, hashtags, idée Story et Reel — prêts à copier-coller.",
+      "En quelques secondes. Tu saisis ta spécialité, tu cliques sur 'Générer', et tu obtiens un planning de 7 posts pour la semaine — thèmes, format (post, carrousel, reel) et idée de contenu — prêts à développer.",
   },
   {
     question: "Puis-je annuler à tout moment ?",
@@ -831,7 +831,7 @@ export default function LandingPage() {
                 display: "flex",
               }}
             >
-              Commencer — 3 essais gratuits →
+              Commencer — 2 essais gratuits →
             </a>
 
             <p
