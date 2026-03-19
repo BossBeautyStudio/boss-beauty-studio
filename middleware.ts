@@ -69,9 +69,10 @@ export async function middleware(request: NextRequest) {
   }
 
   // Rediriger vers /dashboard si déjà connecté et sur /login
+  // On utilise une URL propre (sans les query params de /login) pour éviter
+  // que ?error=auth_error ou ?redirectTo=... se retrouvent dans /dashboard
   if (pathname === "/login" && user) {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/dashboard";
+    const redirectUrl = new URL("/dashboard", request.nextUrl.origin);
     return NextResponse.redirect(redirectUrl);
   }
 
