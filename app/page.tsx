@@ -207,7 +207,7 @@ export default function LandingPage() {
               className="mt-6 flex flex-wrap justify-center gap-x-5 gap-y-2 lg:justify-start"
             >
               {[
-                "✓ 3 générations gratuites",
+                "✓ 2 générations gratuites",
                 "✓ Aucune compétence requise",
                 "✓ Sans carte bancaire",
               ].map((item) => (
@@ -529,7 +529,7 @@ export default function LandingPage() {
           Essayer gratuitement →
         </a>
         <p className="mt-2 text-center text-xs" style={{ color: "var(--text-muted)" }}>
-          3 générations gratuites · Sans carte bancaire
+          2 générations gratuites · Sans carte bancaire
         </p>
       </div>
 
@@ -1029,7 +1029,7 @@ export default function LandingPage() {
             Essayer gratuitement →
           </a>
           <p className="mt-4 text-xs" style={{ color: "var(--text-muted)" }}>
-            3 générations gratuites · Sans carte bancaire · Accès immédiat
+            2 générations gratuites · Sans carte bancaire · Accès immédiat
           </p>
         </div>
       </section>

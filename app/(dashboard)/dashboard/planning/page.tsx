@@ -3,7 +3,7 @@
 // ============================================================
 // app/(dashboard)/dashboard/planning/page.tsx
 //
-// Module Planning Instagram — formulaire + résultat 30 posts.
+// Module Planning de la semaine — formulaire + résultat 7 jours.
 // POST /api/generate/planning
 // ============================================================
 
@@ -14,11 +14,10 @@ import { FreeTrialBanner, PaywallBanner } from "@/components/dashboard/FreePaywa
 
 interface PlanningPost {
   jour: number;
+  jourNom: string;
+  typeContenu: string;
   theme: string;
-  caption: string;
-  hashtags: string[];
-  story: string;
-  reel: string;
+  description: string;
 }
 
 interface PlanningOutput {
@@ -50,6 +49,8 @@ const SPECIALITE_PILLS = [
   "Cils & sourcils",
   "Massage",
 ];
+
+const enc = (s: string) => encodeURIComponent((s || "").slice(0, 100));
 
 const CONSEILS_PLANNING = [
   "Publie tes posts aux heures de forte activité de ton audience : mardi, mercredi et jeudi entre 11h–13h ou 19h–21h. Utilise les idées Story pour maintenir ta présence quotidienne même les jours sans post au feed. Un planning posté régulièrement, même imparfait, vaut mieux qu'un contenu parfait publié deux fois par mois.",
@@ -182,10 +183,10 @@ export default function PlanningPage() {
       {/* En-tête */}
       <div className="mb-8">
         <h1 className="mb-1 text-2xl font-semibold" style={{ color: "var(--text)" }}>
-          Planning Instagram
+          Planning de la semaine
         </h1>
         <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-          30 jours de contenu prêts à publier, adaptés à ta spécialité.
+          7 jours de contenu stratégique prêts à planifier, adaptés à ta spécialité.
         </p>
       </div>
 
@@ -209,14 +210,14 @@ export default function PlanningPage() {
             }}
           >
             <p className="mb-3 text-sm font-semibold" style={{ color: "var(--text)" }}>
-              🗓️ Un mois de contenu Instagram en 5 minutes
+              🗓️ Une semaine de contenu Instagram en 30 secondes
             </p>
             <p className="mb-3 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
               Tu remplis 4 champs. On génère{" "}
-              <span className="font-medium" style={{ color: "var(--text)" }}>30 posts complets</span>{" "}
-              — caption prête à copier, hashtags adaptés, idée Story et idée Reel pour chaque jour.
-              Le contenu est varié (éducatif, avant/après, coulisses, promotionnel, témoignage) et
-              100 % calibré pour ta spécialité et ton objectif.
+              <span className="font-medium" style={{ color: "var(--text)" }}>7 idées de contenu</span>{" "}
+              — format (Post, Carrousel, Reel, Story), sujet et angle pour chaque jour.
+              La semaine est équilibrée : éducatif, vente, coulisses, engagement — 100 % adapté
+              à ta spécialité.
             </p>
 
             {/* Exemple concret */}
@@ -225,15 +226,15 @@ export default function PlanningPage() {
               style={{ backgroundColor: "var(--surface)", border: "1px solid var(--border)" }}
             >
               <p className="mb-1.5 text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
-                Exemple de post généré — Onglerie · Remplir mon agenda
+                Exemple généré — Onglerie · Remplir mon agenda
               </p>
               <p className="text-xs leading-relaxed" style={{ color: "var(--text)" }}>
-                <span className="font-medium">Jour 1 ·</span>{" "}
-                &ldquo;Ce que tes ongles disent de ton niveau de stress (et ce qu&apos;on peut faire pour ça) 👀
+                <span className="font-medium">Lundi · Carrousel —</span>{" "}
+                &ldquo;3 erreurs qui abîment tes ongles sans le savoir&rdquo;
                 <br />
-                Beaucoup de mes clientes arrivent avec des ongles fragilisés sans savoir pourquoi.
-                Résultat : une pose qui tient moins longtemps et des ongles qui se cassent.
-                La vraie cause ? Le stress. Et ça se voit immédiatement...&rdquo;
+                <span style={{ color: "var(--text-muted)" }}>
+                  Carrousel éducatif avec astuces concrètes. Sauvegarde encouragée.
+                </span>
               </p>
             </div>
           </div>
@@ -381,12 +382,12 @@ export default function PlanningPage() {
                 className="btn btn-primary"
                 disabled={loading}
               >
-                {loading ? "On prépare ton mois… ✨" : "Générer mon planning →"}
+                {loading ? "On prépare ta semaine… ✨" : "Générer mon planning →"}
               </button>
 
               {!loading && (
                 <p className="text-center text-xs" style={{ color: "var(--text-muted)" }}>
-                  Génération en ~15 secondes · 30 posts prêts à copier-coller
+                  Génération en ~5 secondes · 7 jours prêts à planifier
                 </p>
               )}
             </form>
@@ -399,88 +400,106 @@ export default function PlanningPage() {
         <div className="slide-up">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-lg font-semibold" style={{ color: "var(--text)" }}>
-              Ton planning — 30 jours
+              Ton planning — 7 jours
             </h2>
             <button
               className="btn btn-secondary"
               onClick={() => setResult(null)}
             >
-              Recommencer à zéro
+              Nouvelle semaine
             </button>
           </div>
 
-          <div className="flex flex-col gap-3">
-            {result.posts.map((post) => (
-              <div key={post.jour} className="card">
-                {/* En-tête post */}
-                <div className="mb-3 flex items-center gap-3">
-                  <span
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                    style={{ backgroundColor: "var(--accent)" }}
-                  >
-                    {post.jour}
-                  </span>
-                  <span className="text-sm font-semibold" style={{ color: "var(--text)" }}>
-                    {post.theme}
-                  </span>
-                </div>
-
-                {/* Caption */}
-                <p
-                  className="mb-3 text-sm leading-relaxed whitespace-pre-line"
-                  style={{ color: "var(--text)" }}
-                >
-                  {post.caption}
-                </p>
-
-                {/* Hashtags */}
-                <div className="mb-3 flex flex-wrap gap-1.5">
-                  {post.hashtags.map((tag) => (
-                    <span key={tag} className="badge">{tag}</span>
-                  ))}
-                </div>
-
-                {/* Story & Reel — blocs distincts et colorés */}
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  {/* Story */}
-                  <div
-                    className="rounded-[10px] px-3 py-2.5"
-                    style={{
-                      backgroundColor: "var(--surface-alt)",
-                      borderLeft: "3px solid #6b9fd4",
-                    }}
-                  >
-                    <p
-                      className="mb-1 text-xs font-semibold"
-                      style={{ color: "#6b9fd4" }}
-                    >
-                      📸 Story du jour
-                    </p>
-                    <p className="text-xs leading-relaxed" style={{ color: "var(--text)" }}>
-                      {post.story}
-                    </p>
-                  </div>
-                  {/* Reel */}
-                  <div
-                    className="rounded-[10px] px-3 py-2.5"
-                    style={{
-                      backgroundColor: "var(--surface-alt)",
-                      borderLeft: "3px solid #9b7fd4",
-                    }}
-                  >
-                    <p
-                      className="mb-1 text-xs font-semibold"
-                      style={{ color: "#9b7fd4" }}
-                    >
-                      🎬 Idée Reel
-                    </p>
-                    <p className="text-xs leading-relaxed" style={{ color: "var(--text)" }}>
-                      {post.reel}
-                    </p>
-                  </div>
-                </div>
-              </div>
+          {/* Légende formats */}
+          <div className="mb-4 flex flex-wrap gap-1.5">
+            {[
+              { label: "Post", color: "var(--accent)" },
+              { label: "Carrousel", color: "#6b9fd4" },
+              { label: "Reel", color: "#9b7fd4" },
+              { label: "Story", color: "#7fc9a0" },
+            ].map(({ label, color }) => (
+              <span
+                key={label}
+                className="rounded-full px-2.5 py-0.5 text-xs font-semibold text-white"
+                style={{ backgroundColor: color }}
+              >
+                {label}
+              </span>
             ))}
+          </div>
+
+          <div className="flex flex-col gap-3">
+            {result.posts.map((post) => {
+              const formatColor: Record<string, string> = {
+                Post: "var(--accent)",
+                Carrousel: "#6b9fd4",
+                Reel: "#9b7fd4",
+                Story: "#7fc9a0",
+              };
+              const color = formatColor[post.typeContenu] ?? "var(--accent)";
+
+              return (
+                <div
+                  key={post.jour}
+                  className="card"
+                  style={{ borderLeft: `3px solid ${color}` }}
+                >
+                  {/* En-tête : jour + badge format */}
+                  <div className="mb-2 flex items-center gap-2">
+                    <span
+                      className="text-sm font-bold"
+                      style={{ color: "var(--text)", minWidth: "4.5rem" }}
+                    >
+                      {post.jourNom}
+                    </span>
+                    <span
+                      className="rounded-full px-2 py-0.5 text-[10px] font-semibold text-white"
+                      style={{ backgroundColor: color }}
+                    >
+                      {post.typeContenu}
+                    </span>
+                  </div>
+
+                  {/* Thème */}
+                  <p className="mb-1 text-sm font-semibold" style={{ color: "var(--text)" }}>
+                    {post.theme}
+                  </p>
+
+                  {/* Description / Angle */}
+                  <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                    {post.description}
+                  </p>
+
+                  {/* Workflow — actions rapides */}
+                  <div
+                    className="mt-3 flex flex-wrap gap-1.5 pt-2.5"
+                    style={{ borderTop: "1px solid var(--border)" }}
+                  >
+                    <a
+                      href={`/dashboard/post?contexte=${enc(post.theme)}&from=planning`}
+                      className="btn btn-secondary"
+                      style={{ fontSize: "0.7rem", padding: "0.25rem 0.65rem" }}
+                    >
+                      📝 Créer ce post
+                    </a>
+                    <a
+                      href={`/dashboard/carousel?sujet=${enc(post.theme)}&from=planning`}
+                      className="btn btn-secondary"
+                      style={{ fontSize: "0.7rem", padding: "0.25rem 0.65rem" }}
+                    >
+                      🖼️ En carrousel
+                    </a>
+                    <a
+                      href={`/dashboard/hooks?sujet=${enc(post.theme)}&from=planning`}
+                      className="btn btn-secondary"
+                      style={{ fontSize: "0.7rem", padding: "0.25rem 0.65rem" }}
+                    >
+                      ⚡ Accroches
+                    </a>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           {/* Pourquoi ce contenu attire des clientes */}

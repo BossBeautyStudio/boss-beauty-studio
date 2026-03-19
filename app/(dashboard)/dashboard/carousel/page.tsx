@@ -71,6 +71,102 @@ const CONSEILS_CAROUSEL = [
   "Réutilise chaque carrousel au maximum : poste-le en Reel en lisant les slides à voix haute, partage-le en Story avec un sondage, et mentionne-le en DM à tes clientes. Un seul carrousel bien fait peut alimenter une semaine entière de contenu.",
 ];
 
+// ── Sous-composant SlideCard ──────────────────────────────────────────────────
+
+interface SlideCardProps {
+  slide: CarouselSlide;
+  onRegenerate: () => void;
+  regenerating: boolean;
+}
+
+function SlideCard({ slide, onRegenerate, regenerating }: SlideCardProps) {
+  const [editedTitre, setEditedTitre] = useState(slide.titre);
+  const [editedTexte, setEditedTexte] = useState(slide.texte);
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Sync quand slide change (régénération)
+  useEffect(() => {
+    setEditedTitre(slide.titre);
+    setEditedTexte(slide.texte);
+    setIsEditing(false);
+  }, [slide.titre, slide.texte]);
+
+  return (
+    <div className="card">
+      <div className="mb-2 flex items-center gap-2">
+        <span
+          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+          style={{ backgroundColor: "var(--accent)" }}
+        >
+          {slide.numero}
+        </span>
+        {isEditing ? (
+          <input
+            type="text"
+            className="input"
+            value={editedTitre}
+            onChange={(e) => setEditedTitre(e.target.value)}
+            style={{ fontSize: "0.875rem", fontWeight: 600 }}
+          />
+        ) : (
+          <span className="text-sm font-semibold" style={{ color: "var(--text)" }}>
+            {editedTitre}
+          </span>
+        )}
+      </div>
+
+      {isEditing ? (
+        <textarea
+          className="textarea mb-2"
+          value={editedTexte}
+          onChange={(e) => setEditedTexte(e.target.value)}
+          rows={3}
+        />
+      ) : (
+        <p className="mb-2 text-sm leading-relaxed" style={{ color: "var(--text)" }}>
+          {editedTexte}
+        </p>
+      )}
+
+      <div
+        className="mb-3 rounded-[8px] px-3 py-2"
+        style={{ backgroundColor: "var(--surface-alt)" }}
+      >
+        <p className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
+          📷 Visuel suggéré
+        </p>
+        <p className="text-xs leading-relaxed" style={{ color: "var(--text)" }}>
+          {slide.visuel}
+        </p>
+      </div>
+
+      {/* Barre d'actions */}
+      <div
+        className="flex flex-wrap gap-2"
+        style={{ borderTop: "1px solid var(--border)", paddingTop: "0.65rem" }}
+      >
+        <button
+          type="button"
+          className="btn btn-secondary"
+          style={{ fontSize: "0.7rem", padding: "0.25rem 0.65rem" }}
+          onClick={() => setIsEditing((v) => !v)}
+        >
+          {isEditing ? "💾 Enregistrer" : "✏️ Modifier"}
+        </button>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          style={{ fontSize: "0.7rem", padding: "0.25rem 0.65rem" }}
+          onClick={onRegenerate}
+          disabled={regenerating}
+        >
+          {regenerating ? "⏳" : "🔄"} Régénérer
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── Utilitaire CTA dynamique ──────────────────────────────────────────────────
 
 function getCtaKeyword(specialite: string): string {
@@ -112,6 +208,9 @@ export default function CarouselPage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<CarouselOutput | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [regenerating, setRegenerating] = useState(false);
+  const [editedCaption, setEditedCaption] = useState("");
+  const [isEditingCaption, setIsEditingCaption] = useState(false);
 
   // Free trial state
   const [isFree, setIsFree] = useState(false);
@@ -121,6 +220,21 @@ export default function CarouselPage() {
   const [conseil] = useState<string>(
     () => CONSEILS_CAROUSEL[Math.floor(Math.random() * CONSEILS_CAROUSEL.length)]
   );
+
+  // Pré-remplissage depuis URL params (venant d'un autre module)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const s = params.get("sujet");
+    if (s) setSujet(decodeURIComponent(s));
+  }, []);
+
+  // Sync editedCaption quand result change (régénération)
+  useEffect(() => {
+    if (result) {
+      setEditedCaption(result.caption);
+      setIsEditingCaption(false);
+    }
+  }, [result]);
 
   // Charger le statut de quota au montage
   useEffect(() => {
@@ -134,6 +248,33 @@ export default function CarouselPage() {
       })
       .catch(() => {/* silently ignore */});
   }, []);
+
+  async function handleRegenerate() {
+    if (!sujet || !specialite) return;
+    setRegenerating(true);
+    try {
+      const res = await fetch("/api/generate/carousel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sujet,
+          specialite,
+          nombreSlides,
+          tonStyle,
+          publicCible: publicCible || undefined,
+        }),
+      });
+      const body = await res.json();
+      if (res.ok && body.data) {
+        setResult(body.data);
+        posthog.capture("generate_post", { module: "carousel", action: "regenerate" });
+      }
+    } catch {
+      // silently ignore
+    } finally {
+      setRegenerating(false);
+    }
+  }
 
   async function handleCopy(text: string, key: string) {
     try {
@@ -418,33 +559,12 @@ export default function CarouselPage() {
           {/* Slides */}
           <div className="mb-4 flex flex-col gap-3">
             {result.slides.map((slide) => (
-              <div key={slide.numero} className="card">
-                <div className="mb-2 flex items-center gap-2">
-                  <span
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                    style={{ backgroundColor: "var(--accent)" }}
-                  >
-                    {slide.numero}
-                  </span>
-                  <span className="text-sm font-semibold" style={{ color: "var(--text)" }}>
-                    {slide.titre}
-                  </span>
-                </div>
-                <p className="mb-2 text-sm leading-relaxed" style={{ color: "var(--text)" }}>
-                  {slide.texte}
-                </p>
-                <div
-                  className="rounded-[8px] px-3 py-2"
-                  style={{ backgroundColor: "var(--surface-alt)" }}
-                >
-                  <p className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
-                    📷 Visuel suggéré
-                  </p>
-                  <p className="text-xs leading-relaxed" style={{ color: "var(--text)" }}>
-                    {slide.visuel}
-                  </p>
-                </div>
-              </div>
+              <SlideCard
+                key={slide.numero}
+                slide={slide}
+                onRegenerate={handleRegenerate}
+                regenerating={regenerating}
+              />
             ))}
           </div>
 
@@ -455,16 +575,50 @@ export default function CarouselPage() {
                 Texte de publication
               </p>
               <CopyButton
-                text={result.caption}
+                text={editedCaption || result.caption}
                 label="📋 Copier"
                 isFree={isFree}
                 freeRemaining={freeRemaining}
                 className="btn btn-secondary shrink-0"
               />
             </div>
-            <p className="mb-4 text-sm leading-relaxed whitespace-pre-line" style={{ color: "var(--text)" }}>
-              {result.caption}
-            </p>
+
+            {isEditingCaption ? (
+              <textarea
+                className="textarea mb-4"
+                value={editedCaption}
+                onChange={(e) => setEditedCaption(e.target.value)}
+                rows={6}
+              />
+            ) : (
+              <p className="mb-4 text-sm leading-relaxed whitespace-pre-line" style={{ color: "var(--text)" }}>
+                {editedCaption || result.caption}
+              </p>
+            )}
+
+            {/* Barre d'actions caption */}
+            <div
+              className="mb-4 flex flex-wrap gap-2"
+              style={{ borderTop: "1px solid var(--border)", paddingTop: "0.65rem" }}
+            >
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ fontSize: "0.75rem" }}
+                onClick={() => setIsEditingCaption((v) => !v)}
+              >
+                {isEditingCaption ? "💾 Enregistrer" : "✏️ Modifier"}
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ fontSize: "0.75rem" }}
+                onClick={handleRegenerate}
+                disabled={regenerating}
+              >
+                {regenerating ? "⏳ Régénération…" : "🔄 Régénérer"}
+              </button>
+            </div>
 
             <div className="mb-1 flex items-center justify-between gap-4">
               <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
@@ -689,6 +843,38 @@ export default function CarouselPage() {
             <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
               {conseil}
             </p>
+          </div>
+
+          {/* Workflow — continuer avec ce contenu */}
+          <div
+            className="mt-3 rounded-[14px] px-5 py-4"
+            style={{
+              backgroundColor: "var(--surface-alt)",
+              border: "1px solid var(--border)",
+            }}
+          >
+            <p
+              className="mb-3 text-xs font-semibold uppercase tracking-wide"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Continuer avec ce contenu
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <a
+                href={`/dashboard/post?contexte=${encodeURIComponent((result.titre || "").slice(0, 100))}&from=carousel`}
+                className="btn btn-secondary"
+                style={{ fontSize: "0.75rem" }}
+              >
+                ✏️ Adapter en post
+              </a>
+              <a
+                href="/dashboard/dm?from=carousel"
+                className="btn btn-secondary"
+                style={{ fontSize: "0.75rem" }}
+              >
+                💬 Préparer réponses DM
+              </a>
+            </div>
           </div>
 
           {/* Bandeau paywall free trial */}

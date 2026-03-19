@@ -16,6 +16,23 @@ import posthog from "posthog-js";
 import { POST_TYPES, type PostOutput } from "@/lib/prompts";
 import { FreeTrialBanner, CopyButton, PaywallBanner } from "@/components/dashboard/FreePaywall";
 
+// ── Types partagés ────────────────────────────────────────────────────────────
+
+interface PostParams {
+  typePost: string;
+  specialite: string;
+  tonStyle: string;
+  contexte?: string;
+}
+
+// ── Structure pour futures transformations rapides ────────────────────────────
+// Décommenter + brancher sur une API IA quand prêt
+// const QUICK_TRANSFORMS = [
+//   { id: "plus-vendeur", label: "💰 Plus vendeur" },
+//   { id: "plus-court",   label: "✂️ Plus court"   },
+//   { id: "plus-naturel", label: "🌿 Plus naturel"  },
+// ] as const;
+
 const TONE_OPTIONS = [
   "Chaleureux et proche",
   "Expert et éducatif",
@@ -32,6 +49,61 @@ const SPECIALITE_PILLS = [
   "Maquillage",
   "Massage",
 ];
+
+// ── Mapping type de post → templates Canva ────────────────────────────────────
+// Structure extensible : plusieurs templates possibles par type
+const CANVA_POST_TEMPLATES: Record<string, { label: string; url: string }[]> = {
+  attirer: [
+    {
+      label: "Template marketing beauté",
+      url: "https://www.canva.com/templates/?query=beauty+salon+marketing+instagram+post",
+    },
+    {
+      label: "Template call to action",
+      url: "https://www.canva.com/templates/?query=beauty+call+to+action+instagram+post",
+    },
+  ],
+  "avant-apres": [
+    {
+      label: "Template avant / après",
+      url: "https://www.canva.com/templates/?query=before+after+transformation+beauty+instagram+post",
+    },
+    {
+      label: "Template transformation",
+      url: "https://www.canva.com/templates/?query=beauty+transformation+instagram+post",
+    },
+  ],
+  promo: [
+    {
+      label: "Template promotion",
+      url: "https://www.canva.com/templates/?query=beauty+salon+promotion+sale+instagram+post",
+    },
+    {
+      label: "Template offre spéciale",
+      url: "https://www.canva.com/templates/?query=beauty+special+offer+instagram+post",
+    },
+  ],
+  conseil: [
+    {
+      label: "Template conseil beauté",
+      url: "https://www.canva.com/templates/?query=beauty+tips+educational+instagram+post",
+    },
+    {
+      label: "Template astuce du jour",
+      url: "https://www.canva.com/templates/?query=beauty+tip+of+the+day+instagram+post",
+    },
+  ],
+  "reponse-dm": [
+    {
+      label: "Template Q&A beauté",
+      url: "https://www.canva.com/templates/?query=beauty+question+answer+instagram+post",
+    },
+    {
+      label: "Template éducatif",
+      url: "https://www.canva.com/templates/?query=beauty+educational+instagram+post",
+    },
+  ],
+};
 
 // ── Step 1 : sélection du type ────────────────────────────────────────────────
 
@@ -185,7 +257,7 @@ function PostForm({
 }: {
   selectedType: (typeof POST_TYPES)[number];
   onBack: () => void;
-  onResult: (data: PostOutput, isFree: boolean, freeRemaining: number) => void;
+  onResult: (data: PostOutput, isFree: boolean, freeRemaining: number, params: PostParams) => void;
   isFree: boolean;
   freeRemaining: number;
 }) {
@@ -196,6 +268,13 @@ function PostForm({
   const [contexte, setContexte] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Pré-remplissage depuis URL params (venant d'un autre module)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const c = params.get("contexte");
+    if (c) setContexte(decodeURIComponent(c));
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -227,7 +306,8 @@ function PostForm({
             ideeReel: null,
           },
           true,
-          0
+          0,
+          { typePost: selectedType.label, specialite, tonStyle, contexte: contexte.trim() || undefined }
         );
         return;
       }
@@ -242,7 +322,12 @@ function PostForm({
         );
       }
 
-      onResult(body.data, body.isFree ?? false, body.freeRemaining ?? 0);
+      onResult(body.data, body.isFree ?? false, body.freeRemaining ?? 0, {
+        typePost: selectedType.label,
+        specialite,
+        tonStyle,
+        contexte: contexte.trim() || undefined,
+      });
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erreur inconnue.");
@@ -406,13 +491,31 @@ function PostResult({
   isFree,
   freeRemaining,
   onReset,
+  onRegenerate,
+  regenerating,
 }: {
   result: PostOutput;
   selectedType: (typeof POST_TYPES)[number];
   isFree: boolean;
   freeRemaining: number;
   onReset: () => void;
+  onRegenerate: () => void;
+  regenerating: boolean;
 }) {
+  // ── Inline editing state ──────────────────────────────────────────────────
+  const [editedCaption, setEditedCaption] = useState(result.caption);
+  const [isEditingCaption, setIsEditingCaption] = useState(false);
+  const [editedHook, setEditedHook] = useState(result.hook);
+  const [isEditingHook, setIsEditingHook] = useState(false);
+
+  // Sync quand result change (régénération)
+  useEffect(() => {
+    setEditedCaption(result.caption);
+    setIsEditingCaption(false);
+    setEditedHook(result.hook);
+    setIsEditingHook(false);
+  }, [result]);
+
   // Cas paywall total (quota gratuit épuisé avant génération)
   const isFullPaywall = isFree && freeRemaining <= 0 && !result.caption;
 
@@ -466,15 +569,35 @@ function PostResult({
             borderBottom: "1px solid var(--border)",
           }}
         >
-          <p
-            className="mb-1 text-[10px] font-semibold uppercase tracking-widest"
-            style={{ color: "var(--text-muted)" }}
-          >
-            Première phrase
-          </p>
-          <p className="text-sm font-medium" style={{ color: "var(--text)" }}>
-            {result.hook}
-          </p>
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <p
+              className="text-[10px] font-semibold uppercase tracking-widest"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Première phrase
+            </p>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ fontSize: "0.7rem", padding: "0.2rem 0.55rem" }}
+              onClick={() => setIsEditingHook((v) => !v)}
+            >
+              {isEditingHook ? "💾 Enregistrer" : "✏️ Modifier"}
+            </button>
+          </div>
+          {isEditingHook ? (
+            <textarea
+              className="textarea"
+              value={editedHook}
+              onChange={(e) => setEditedHook(e.target.value)}
+              rows={2}
+              style={{ fontSize: "0.875rem", fontWeight: 500 }}
+            />
+          ) : (
+            <p className="text-sm font-medium" style={{ color: "var(--text)" }}>
+              {editedHook}
+            </p>
+          )}
         </div>
 
         {/* Texte du post */}
@@ -487,19 +610,28 @@ function PostResult({
               Texte du post
             </p>
             <CopyButton
-              text={result.caption}
+              text={editedCaption}
               label="Copier le texte"
               isFree={isFree}
               freeRemaining={freeRemaining}
             />
           </div>
 
-          <p
-            className="mb-4 whitespace-pre-line text-sm leading-relaxed"
-            style={{ color: "var(--text)" }}
-          >
-            {result.caption}
-          </p>
+          {isEditingCaption ? (
+            <textarea
+              className="textarea mb-4"
+              value={editedCaption}
+              onChange={(e) => setEditedCaption(e.target.value)}
+              rows={8}
+            />
+          ) : (
+            <p
+              className="mb-4 whitespace-pre-line text-sm leading-relaxed"
+              style={{ color: "var(--text)" }}
+            >
+              {editedCaption}
+            </p>
+          )}
 
           {/* Hashtags */}
           <div className="mb-4 flex flex-wrap gap-1.5">
@@ -511,11 +643,35 @@ function PostResult({
           </div>
 
           <CopyButton
-            text={[result.caption, "", result.hashtags.join(" ")].join("\n")}
+            text={[editedCaption, "", result.hashtags.join(" ")].join("\n")}
             label="Copier texte + hashtags"
             isFree={isFree}
             freeRemaining={freeRemaining}
           />
+
+          {/* Barre d'actions — modifier / régénérer */}
+          <div
+            className="mt-3 flex flex-wrap gap-2"
+            style={{ borderTop: "1px solid var(--border)", paddingTop: "0.75rem" }}
+          >
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ fontSize: "0.75rem" }}
+              onClick={() => setIsEditingCaption((v) => !v)}
+            >
+              {isEditingCaption ? "💾 Enregistrer" : "✏️ Modifier"}
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              style={{ fontSize: "0.75rem" }}
+              onClick={onRegenerate}
+              disabled={regenerating}
+            >
+              {regenerating ? "⏳ Régénération…" : "🔄 Régénérer"}
+            </button>
+          </div>
         </div>
 
         {/* Story & Reel */}
@@ -571,6 +727,83 @@ function PostResult({
         </div>
       </div>
 
+      {/* Bloc Canva — template adapté au type de post */}
+      {(() => {
+        const templates = CANVA_POST_TEMPLATES[selectedType.id] ?? [];
+        if (!templates.length) return null;
+        return (
+          <div
+            className="mb-4 rounded-[14px] px-5 py-5"
+            style={{
+              backgroundColor: "var(--surface-alt)",
+              border: "1px solid var(--border)",
+            }}
+          >
+            <p className="mb-1 text-sm font-semibold" style={{ color: "var(--text)" }}>
+              🎨 Créer le visuel dans{" "}
+              <span style={{ color: "var(--accent)" }}>Canva gratuit</span>
+            </p>
+            <p className="mb-4 text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
+              {/* Version desktop — phrase complète */}
+              <span className="hidden sm:inline">
+                Utilise un template prêt à l&apos;emploi adapté à ce type de post — crée ton
+                visuel en quelques secondes, sans designer.
+              </span>
+              {/* Version mobile — plus courte */}
+              <span className="sm:hidden">
+                Template Canva prêt à personnaliser en quelques clics.
+              </span>
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {templates.map((t) => (
+                <a
+                  key={t.label}
+                  href={t.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary"
+                  style={{ fontSize: "0.75rem", padding: "0.35rem 0.85rem" }}
+                >
+                  {t.label} ↗
+                </a>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Workflow — continuer avec ce contenu */}
+      <div
+        className="mb-4 rounded-[14px] px-5 py-4"
+        style={{
+          backgroundColor: "var(--surface-alt)",
+          border: "1px solid var(--border)",
+        }}
+      >
+        <p
+          className="mb-3 text-xs font-semibold uppercase tracking-wide"
+          style={{ color: "var(--text-muted)" }}
+        >
+          Continuer avec ce contenu
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <a
+            href={`/dashboard/hooks?sujet=${encodeURIComponent((result.hook || "").slice(0, 100))}&from=post`}
+            className="btn btn-secondary"
+            style={{ fontSize: "0.75rem" }}
+          >
+            ⚡ Affiner les accroches
+          </a>
+          <a
+            href="/dashboard/dm?from=post"
+            className="btn btn-secondary"
+            style={{ fontSize: "0.75rem" }}
+          >
+            💬 Préparer réponses DM
+          </a>
+        </div>
+      </div>
+
       {/* Paywall banner si essai gratuit */}
       {isFree && <PaywallBanner freeRemaining={freeRemaining} />}
 
@@ -615,6 +848,8 @@ export default function PostPage() {
   const [result, setResult] = useState<PostOutput | null>(null);
   const [isFree, setIsFree] = useState(false);
   const [freeRemaining, setFreeRemaining] = useState(0);
+  const [lastParams, setLastParams] = useState<PostParams | null>(null);
+  const [regenerating, setRegenerating] = useState(false);
 
   // Charger le statut de quota au montage
   useEffect(() => {
@@ -640,13 +875,36 @@ export default function PostPage() {
   function handleResult(
     data: PostOutput,
     free: boolean,
-    freeRem: number
+    freeRem: number,
+    params: PostParams
   ) {
     setResult(data);
+    setLastParams(params);
     posthog.capture("generate_post", { module: "post" });
     setIsFree(free);
     setFreeRemaining(freeRem);
     setStep("result");
+  }
+
+  async function handleRegenerate() {
+    if (!lastParams) return;
+    setRegenerating(true);
+    try {
+      const res = await fetch("/api/generate/post", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(lastParams),
+      });
+      const body = await res.json();
+      if (res.ok && body.data) {
+        setResult(body.data);
+        posthog.capture("generate_post", { module: "post", action: "regenerate" });
+      }
+    } catch {
+      // silently ignore
+    } finally {
+      setRegenerating(false);
+    }
   }
 
   function handleReset() {
@@ -682,6 +940,8 @@ export default function PostPage() {
           isFree={isFree}
           freeRemaining={freeRemaining}
           onReset={handleReset}
+          onRegenerate={handleRegenerate}
+          regenerating={regenerating}
         />
       )}
     </div>

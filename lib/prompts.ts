@@ -30,8 +30,8 @@ import type { ClaudeCallParams } from "./claude";
  */
 export const MODEL_CONFIG = {
   planning: {
-    model: MODEL.sonnet,
-    maxTokens: 3500, // 30 posts × ~90 tokens (structure compacte) + structure JSON
+    model: MODEL.haiku, // 7 posts simples — Haiku suffisant, plus rapide
+    maxTokens: 900, // 7 posts × ~100 tokens (structure légère) + structure JSON
   },
   carousel: {
     model: MODEL.sonnet,
@@ -54,16 +54,15 @@ export const MODEL_CONFIG = {
 // ── Types de sorties JSON ──────────────────────────────────────────────────────
 
 /**
- * Un post du planning — structure compacte V1.
- * 6 clés exactes : jour, theme, caption, hashtags, story, reel.
+ * Un post du planning hebdomadaire — structure légère V2.
+ * 5 clés exactes : jour, jourNom, typeContenu, theme, description.
  */
 export interface PlanningPost {
-  jour: number;       // 1 à 30
-  theme: string;      // thème/sujet du post en quelques mots (ex: "Avant / Après — pose gel")
-  caption: string;    // caption complète prête à publier avec émojis
-  hashtags: string[]; // exactement 5 à 8 hashtags
-  story: string;      // idée de Story associée au post du jour (1 phrase)
-  reel: string;       // idée de Reel associée au post du jour (1 phrase)
+  jour: number;         // 1 à 7
+  jourNom: string;      // nom du jour ("Lundi", "Mardi"… calculé depuis dateDebut)
+  typeContenu: string;  // "Post" | "Carrousel" | "Reel" | "Story"
+  theme: string;        // idée/sujet du contenu (5-8 mots)
+  description: string;  // angle et approche (1-2 phrases concrètes)
 }
 
 /** Sortie complète du module planning */
@@ -151,27 +150,26 @@ export interface HooksParams {
 // ── Prompts système ────────────────────────────────────────────────────────────
 
 /**
- * Prompt système — Module planning 30 jours.
- * V2 : contrainte avant/après + ancrage spécialité renforcé.
+ * Prompt système — Module planning hebdomadaire (7 jours).
+ * V3 : format léger, stratégique, rapide — idée + angle par jour.
  */
 export const SYSTEM_PLANNING = `Tu es une experte en stratégie de contenu Instagram pour les professionnelles de la beauté (coiffure, esthétique, onglerie, maquillage, soins du corps).
 
-Ta mission : générer un planning de contenu Instagram pour exactement 30 jours, varié, engageant et parfaitement adapté à la spécialité et aux objectifs de la professionnelle.
+Ta mission : générer un planning de contenu Instagram pour exactement 7 jours (une semaine complète), varié, stratégique et parfaitement adapté à la spécialité et aux objectifs de la professionnelle.
 
 Règles de contenu :
-- Varie les thèmes sur les 30 jours : éducatif, promotionnel, coulisses, témoignage, avant/après, divertissement, inspiration. Aucune catégorie ne doit dépasser 40 % du total.
-- MINIMUM 4 posts sur 30 doivent être de type "Avant / Après" — ils montrent un résultat concret avant et après une prestation liée à la spécialité. Le champ "theme" de ces posts doit commencer par "Avant / Après —".
-- CHAQUE caption doit être spécifiquement ancrée dans la spécialité indiquée. Il est INTERDIT de générer du contenu générique applicable à n'importe quelle professionnelle de la beauté. Si la spécialité est "onglerie", toutes les captions parlent d'ongles, de poses, de gels, de vernis — jamais d'un autre domaine.
-- La caption est complète et prête à publier : émojis adaptés, sauts de ligne aérés, contenu de valeur. Max 5 phrases. CTA naturel inclus (ex: "Sauvegarde 💾", "Dis-moi en commentaire", "Envoie-moi 'INFO' en DM").
-- Les hashtags : entre 5 et 8 par post, mélange populaires et de niche, cohérents avec la spécialité et le thème.
-- La story : une idée concrète et réalisable de Story Instagram liée au post du jour, spécifique à la spécialité (ex: "Sondage : tu préfères gel ou vernis ?").
-- Le reel : une idée concrète et réalisable de Reel lié au post du jour, spécifique à la spécialité (ex: "Timelapse d'une pose d'ongles en 30 secondes").
+- Varie les formats : Post, Carrousel, Reel, Story. Maximum 3 fois le même format sur la semaine.
+- Varie les thèmes : éducatif, vente/promo, coulisses, avant/après, témoignage/preuve, engagement, inspiration.
+- Chaque semaine doit avoir AU MOINS 1 post orienté vente/action directe et 1 post éducatif.
+- Chaque description est courte (1-2 phrases max), concrète, spécifique à la spécialité — aucun contenu générique.
+- L'objectif de la professionnelle oriente les posts de vente et les angles choisis.
 
 Contraintes de structure absolues :
-- Le JSON doit contenir EXACTEMENT 30 objets dans le tableau "posts".
-- Chaque objet doit avoir EXACTEMENT ces 6 clés : jour, theme, caption, hashtags, story, reel.
+- Le JSON doit contenir EXACTEMENT 7 objets dans le tableau "posts".
+- Chaque objet doit avoir EXACTEMENT ces 5 clés : jour, jourNom, typeContenu, theme, description.
+- typeContenu : uniquement "Post", "Carrousel", "Reel" ou "Story".
+- jourNom : nom du jour de la semaine en français ("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche") calculé depuis la date de début fournie.
 - Aucune autre clé ne doit être ajoutée.
-- hashtags doit être un tableau de 5 à 8 chaînes de caractères.
 - Ta réponse doit être UNIQUEMENT du JSON valide, sans texte avant, sans texte après, sans bloc markdown.`;
 
 /**
@@ -261,47 +259,47 @@ Contraintes de structure absolues :
 // ── Builders de prompts ────────────────────────────────────────────────────────
 
 /**
- * Construit les paramètres pour l'appel Claude — Module planning 30 jours.
+ * Construit les paramètres pour l'appel Claude — Module planning hebdomadaire (7 jours).
  */
 export function buildPlanningPrompt(params: PlanningParams): ClaudeCallParams {
   const villeInfo = params.ville ? `\n- Localisation : ${params.ville}` : "";
 
-  const prompt = `Génère un planning de contenu Instagram pour exactement 30 jours.
+  const prompt = `Génère un planning de contenu Instagram pour une semaine complète (7 jours).
 
 Profil de la professionnelle :
 - Spécialité : ${params.specialite}${villeInfo}
 - Objectif principal : ${params.objectif}
 - Style de communication : ${params.tonStyle}
-- Début du planning : ${params.dateDebut}
+- Début de la semaine : ${params.dateDebut}
 
 Instructions :
-- EXACTEMENT 30 posts, jour 1 à 30, sans exception.
-- Minimum 4 posts de type "Avant / Après" avec résultat concret lié à la spécialité "${params.specialite}". Le champ "theme" de ces posts commence par "Avant / Après —".
-- Chaque post doit être UNIQUEMENT adapté à la spécialité "${params.specialite}" — aucun contenu générique non lié à cette spécialité.
-- L'objectif "${params.objectif}" oriente les posts promotionnels et les CTA intégrés aux captions.
-- Varie les formats : éducatif, avant/après, coulisses, promotion, témoignage, inspiration.
+- EXACTEMENT 7 posts, jour 1 à 7.
+- jourNom = nom du jour correspondant à la date de début (ex: si ${params.dateDebut} est un lundi → Jour 1 = "Lundi", Jour 2 = "Mardi", ..., Jour 7 = "Dimanche").
+- Alterne les formats : Post, Carrousel, Reel, Story — max 3 fois le même format.
+- Varie les thèmes : éducatif, vente/action, coulisses, avant/après, engagement.
+- L'objectif "${params.objectif}" oriente au moins 2 posts vers la vente ou l'action directe.
+- Chaque theme (5-8 mots) et description (1-2 phrases) sont spécifiques à "${params.specialite}" — aucun contenu générique.
 
 Structure JSON attendue — EXACTEMENT ces clés, aucune autre :
 {
   "posts": [
     {
       "jour": 1,
-      "theme": "thème ou sujet du post en quelques mots",
-      "caption": "caption complète prête à publier avec émojis et CTA inclus",
-      "hashtags": ["#hashtag1", "#hashtag2", "#hashtag3", "#hashtag4", "#hashtag5"],
-      "story": "idée de Story Instagram liée au post du jour (1 phrase)",
-      "reel": "idée de Reel lié au post du jour (1 phrase)"
+      "jourNom": "Lundi",
+      "typeContenu": "Post",
+      "theme": "idée du contenu en 5-8 mots",
+      "description": "angle et approche en 1-2 phrases concrètes"
     }
   ]
 }
 
 Contraintes strictes :
-- Le tableau posts doit contenir EXACTEMENT 30 objets.
-- Chaque objet doit avoir EXACTEMENT 6 clés : jour, theme, caption, hashtags, story, reel.
-- hashtags doit contenir entre 5 et 8 éléments.
+- Le tableau posts doit contenir EXACTEMENT 7 objets.
+- Chaque objet doit avoir EXACTEMENT 5 clés : jour, jourNom, typeContenu, theme, description.
+- typeContenu : uniquement "Post", "Carrousel", "Reel" ou "Story".
 - Aucune clé supplémentaire.
 
-Génère les 30 posts en JSON uniquement.`;
+Génère les 7 posts en JSON uniquement.`;
 
   return {
     model: MODEL_CONFIG.planning.model,

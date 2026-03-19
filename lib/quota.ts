@@ -31,7 +31,7 @@ import { createServiceClient } from "./supabase/server";
 export const MONTHLY_LIMIT = 30;
 
 /** Nombre de générations gratuites autorisées sans abonnement actif. */
-export const FREE_LIMIT = 3;
+export const FREE_LIMIT = 2;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 

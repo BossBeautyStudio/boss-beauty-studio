@@ -387,6 +387,87 @@ function InputsView({ inputs }: { inputs: Record<string, unknown> }) {
   );
 }
 
+// ── HooksOutputView ────────────────────────────────────────────
+// Composant dédié aux accroches — a son propre état pour le bouton copier.
+
+function HooksOutputView({ output }: { output: unknown }) {
+  const [copied, setCopied] = useState(false);
+
+  const o = output as { hooks?: Array<{ numero: number; hook: string }> };
+  const hooks = Array.isArray(o?.hooks) ? o.hooks : [];
+
+  if (!hooks.length) {
+    return (
+      <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+        Aucune accroche disponible.
+      </p>
+    );
+  }
+
+  async function copyAll() {
+    try {
+      const text = hooks.map((h, i) => `${i + 1}. ${h.hook}`).join("\n");
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // silently ignore
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      {/* Bouton Copier toutes */}
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "0.25rem" }}>
+        <button
+          onClick={copyAll}
+          className="btn btn-secondary"
+          style={{ fontSize: "0.75rem", padding: "0.3rem 0.75rem" }}
+        >
+          {copied ? "✓ Copié !" : "📋 Copier toutes les accroches"}
+        </button>
+      </div>
+
+      {/* Liste des accroches */}
+      {hooks.map((item, i) => (
+        <div
+          key={item.numero ?? i}
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "0.75rem",
+            backgroundColor: "var(--surface-alt)",
+            borderRadius: "var(--radius)",
+            padding: "0.65rem 0.875rem",
+          }}
+        >
+          <span
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "1.375rem",
+              height: "1.375rem",
+              borderRadius: "50%",
+              backgroundColor: "var(--accent)",
+              color: "#fff",
+              fontSize: "0.65rem",
+              fontWeight: 700,
+              flexShrink: 0,
+              marginTop: "0.05rem",
+            }}
+          >
+            {item.numero ?? i + 1}
+          </span>
+          <p className="text-sm leading-snug" style={{ color: "var(--text)" }}>
+            {item.hook}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ── OutputView ─────────────────────────────────────────────────
 // Affiche le résultat de manière lisible selon le type.
 
@@ -407,6 +488,10 @@ function OutputView({ type, output }: { type: GenerationType; output: unknown })
         {JSON.stringify(output, null, 2)}
       </pre>
     );
+  }
+
+  if (type === "hooks") {
+    return <HooksOutputView output={output} />;
   }
 
   if (type === "dm") {
@@ -439,11 +524,20 @@ function OutputView({ type, output }: { type: GenerationType; output: unknown })
   }
 
   if (type === "planning") {
-    const o = output as { posts?: Array<{ jour: number; theme: string; caption: string }> };
+    const o = output as {
+      posts?: Array<{
+        jour: number;
+        jourNom?: string;
+        typeContenu?: string;
+        theme: string;
+        description?: string;
+        caption?: string; // ancienne structure 30 jours
+      }>;
+    };
     if (Array.isArray(o?.posts)) {
       return (
         <div className="flex flex-col gap-2">
-          {o.posts.slice(0, 5).map((post, i) => (
+          {o.posts.map((post, i) => (
             <div
               key={i}
               className="text-sm"
@@ -453,16 +547,20 @@ function OutputView({ type, output }: { type: GenerationType; output: unknown })
                 padding: "0.75rem 1rem",
               }}
             >
-              <span className="badge" style={{ marginRight: "0.5rem" }}>J{post.jour}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", flexWrap: "wrap", marginBottom: "0.25rem" }}>
+                <span className="badge">{post.jourNom ?? `J${post.jour}`}</span>
+                {post.typeContenu && (
+                  <span className="badge" style={{ opacity: 0.85 }}>{post.typeContenu}</span>
+                )}
+              </div>
               <strong style={{ color: "var(--text)" }}>{post.theme}</strong>
-              <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>{post.caption}</p>
+              {(post.description ?? post.caption) && (
+                <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
+                  {post.description ?? post.caption}
+                </p>
+              )}
             </div>
           ))}
-          {o.posts.length > 5 && (
-            <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
-              + {o.posts.length - 5} autres posts
-            </p>
-          )}
         </div>
       );
     }

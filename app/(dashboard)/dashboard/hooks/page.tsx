@@ -55,6 +55,147 @@ const CONSEILS_HOOKS = [
   "Un bon hook ne dévoile pas tout — il crée une tension que seule la lecture du post peut résoudre. Si quelqu'un peut deviner la fin de ton hook avant de lire le post, reformule. L'objectif : que ta cliente se dise « attends, je veux en savoir plus ».",
 ];
 
+const enc = (s: string) => encodeURIComponent((s || "").slice(0, 100));
+
+// ── Sous-composant HookCard ────────────────────────────────────────────────────
+
+interface HookCardProps {
+  item: HookItem;
+  isFree: boolean;
+  freeRemaining: number;
+  onRegenerate: () => void;
+  regenerating: boolean;
+}
+
+function HookCard({ item, isFree, freeRemaining, onRegenerate, regenerating }: HookCardProps) {
+  const [editedHook, setEditedHook] = useState(item.hook);
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Sync quand hook change (régénération)
+  useEffect(() => {
+    setEditedHook(item.hook);
+    setIsEditing(false);
+  }, [item.hook]);
+
+  return (
+    <div className="card">
+      {/* En-tête : numéro + bouton copier */}
+      <div className="mb-3 flex items-start justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <span
+            className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+            style={{ backgroundColor: "var(--accent)" }}
+          >
+            {item.numero}
+          </span>
+          {/* Hook — héros de la carte */}
+          {isEditing ? (
+            <textarea
+              className="textarea"
+              value={editedHook}
+              onChange={(e) => setEditedHook(e.target.value)}
+              rows={2}
+              style={{ fontSize: "0.875rem", fontWeight: 600 }}
+            />
+          ) : (
+            <p className="text-sm font-semibold leading-snug" style={{ color: "var(--text)" }}>
+              {editedHook}
+            </p>
+          )}
+        </div>
+        <CopyButton
+          text={editedHook}
+          label="Copier"
+          isFree={isFree}
+          freeRemaining={freeRemaining}
+          className="btn btn-secondary shrink-0"
+        />
+      </div>
+
+      {/* Pourquoi ça marche */}
+      <p
+        className="mb-3 text-xs leading-relaxed"
+        style={{ color: "var(--text-muted)", fontStyle: "italic" }}
+      >
+        Pourquoi ça marche : {item.pourquoi}
+      </p>
+
+      {/* Comment l'utiliser */}
+      <div
+        className="mb-3 rounded-[8px] px-3 py-2.5"
+        style={{ backgroundColor: "var(--surface-alt)", border: "1px solid var(--border)" }}
+      >
+        <p className="mb-0.5 text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
+          🎯 Comment l&apos;utiliser
+        </p>
+        <p className="text-xs leading-relaxed" style={{ color: "var(--text)" }}>
+          {item.utilisation}
+        </p>
+      </div>
+
+      {/* Idée Reel — conditionnel */}
+      {item.reelIdee && (
+        <div
+          className="mb-3 rounded-[8px] px-3 py-2.5"
+          style={{ backgroundColor: "var(--surface)", border: "1px solid var(--border)" }}
+        >
+          <p className="mb-0.5 text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
+            🎬 Idée Reel associée
+          </p>
+          <p className="text-xs leading-relaxed" style={{ color: "var(--text)" }}>
+            {item.reelIdee}
+          </p>
+        </div>
+      )}
+
+      {/* Workflow — créer du contenu avec cette accroche */}
+      <div
+        className="flex flex-wrap gap-1.5 pt-2.5"
+        style={{ borderTop: "1px solid var(--border)" }}
+      >
+        <a
+          href={`/dashboard/post?contexte=${enc(editedHook)}&from=hooks`}
+          className="btn btn-secondary"
+          style={{ fontSize: "0.7rem", padding: "0.25rem 0.65rem" }}
+        >
+          📝 Créer un post
+        </a>
+        <a
+          href={`/dashboard/carousel?sujet=${enc(editedHook)}&from=hooks`}
+          className="btn btn-secondary"
+          style={{ fontSize: "0.7rem", padding: "0.25rem 0.65rem" }}
+        >
+          🖼️ En carrousel
+        </a>
+      </div>
+
+      {/* Barre d'actions — modifier / régénérer */}
+      <div
+        className="mt-2 flex flex-wrap gap-2"
+        style={{ borderTop: "1px solid var(--border)", paddingTop: "0.65rem" }}
+      >
+        <button
+          type="button"
+          className="btn btn-secondary"
+          style={{ fontSize: "0.7rem", padding: "0.25rem 0.65rem" }}
+          onClick={() => setIsEditing((v) => !v)}
+        >
+          {isEditing ? "💾 Enregistrer" : "✏️ Modifier"}
+        </button>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          style={{ fontSize: "0.7rem", padding: "0.25rem 0.65rem" }}
+          onClick={onRegenerate}
+          disabled={regenerating}
+        >
+          {regenerating ? "⏳" : "🔄"} Régénérer
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── Utilitaire CTA dynamique ──────────────────────────────────────────────────
 
 function getCtaKeyword(specialite: string): string {
@@ -94,6 +235,7 @@ export default function HooksPage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<HooksOutput | null>(null);
   const [copied, setCopied] = useState<number | null>(null);
+  const [regenerating, setRegenerating] = useState(false);
 
   // Free trial state
   const [isFree, setIsFree] = useState(false);
@@ -103,6 +245,15 @@ export default function HooksPage() {
   const [conseil] = useState<string>(
     () => CONSEILS_HOOKS[Math.floor(Math.random() * CONSEILS_HOOKS.length)]
   );
+
+  // Contexte importé depuis un autre module (ex: planning)
+  const [importedSujet, setImportedSujet] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const s = params.get("sujet");
+    if (s) setImportedSujet(decodeURIComponent(s));
+  }, []);
 
   // Charger le statut de quota au montage
   useEffect(() => {
@@ -158,6 +309,27 @@ export default function HooksPage() {
     }
   }
 
+  async function handleRegenerate() {
+    if (!specialite) return;
+    setRegenerating(true);
+    try {
+      const res = await fetch("/api/generate/hooks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ specialite, typeContenu, tonStyle }),
+      });
+      const body = await res.json();
+      if (res.ok && body.data) {
+        setResult(body.data);
+        posthog.capture("generate_post", { module: "hooks", action: "regenerate" });
+      }
+    } catch {
+      // silently ignore
+    } finally {
+      setRegenerating(false);
+    }
+  }
+
   async function handleCopy(text: string, numero: number) {
     try {
       await navigator.clipboard.writeText(text);
@@ -187,6 +359,25 @@ export default function HooksPage() {
         <>
           {/* Bandeau essai gratuit */}
           {isFree && <FreeTrialBanner freeRemaining={freeRemaining} />}
+
+          {/* Bannière contexte importé depuis un autre module */}
+          {importedSujet && (
+            <div
+              className="mb-4 flex items-center gap-2 rounded-[10px] px-4 py-2.5"
+              style={{
+                backgroundColor: "var(--surface-alt)",
+                border: "1px solid var(--border)",
+              }}
+            >
+              <span style={{ color: "var(--accent)" }}>⚡</span>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                Sujet importé :{" "}
+                <span className="font-medium" style={{ color: "var(--text)" }}>
+                  {importedSujet}
+                </span>
+              </p>
+            </div>
+          )}
 
           {/* Paywall si quota épuisé */}
           {isFree && freeRemaining <= 0 && (
@@ -360,66 +551,14 @@ export default function HooksPage() {
 
           <div className="flex flex-col gap-4">
             {result.hooks.map((item) => (
-              <div key={item.numero} className="card">
-                {/* En-tête : numéro + bouton copier */}
-                <div className="mb-3 flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-3">
-                    <span
-                      className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
-                      style={{ backgroundColor: "var(--accent)" }}
-                    >
-                      {item.numero}
-                    </span>
-                    {/* Hook — héros de la carte */}
-                    <p className="text-sm font-semibold leading-snug" style={{ color: "var(--text)" }}>
-                      {item.hook}
-                    </p>
-                  </div>
-                  <CopyButton
-                    text={item.hook}
-                    label="Copier"
-                    isFree={isFree}
-                    freeRemaining={freeRemaining}
-                    className="btn btn-secondary shrink-0"
-                  />
-                </div>
-
-                {/* Pourquoi ça marche */}
-                <p
-                  className="mb-3 text-xs leading-relaxed"
-                  style={{ color: "var(--text-muted)", fontStyle: "italic" }}
-                >
-                  Pourquoi ça marche : {item.pourquoi}
-                </p>
-
-                {/* Comment l'utiliser */}
-                <div
-                  className="mb-3 rounded-[8px] px-3 py-2.5"
-                  style={{ backgroundColor: "var(--surface-alt)", border: "1px solid var(--border)" }}
-                >
-                  <p className="mb-0.5 text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
-                    🎯 Comment l&apos;utiliser
-                  </p>
-                  <p className="text-xs leading-relaxed" style={{ color: "var(--text)" }}>
-                    {item.utilisation}
-                  </p>
-                </div>
-
-                {/* Idée Reel — conditionnel */}
-                {item.reelIdee && (
-                  <div
-                    className="rounded-[8px] px-3 py-2.5"
-                    style={{ backgroundColor: "var(--surface)", border: "1px solid var(--border)" }}
-                  >
-                    <p className="mb-0.5 text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
-                      🎬 Idée Reel associée
-                    </p>
-                    <p className="text-xs leading-relaxed" style={{ color: "var(--text)" }}>
-                      {item.reelIdee}
-                    </p>
-                  </div>
-                )}
-              </div>
+              <HookCard
+                key={item.numero}
+                item={item}
+                isFree={isFree}
+                freeRemaining={freeRemaining}
+                onRegenerate={handleRegenerate}
+                regenerating={regenerating}
+              />
             ))}
           </div>
 

@@ -56,6 +56,7 @@ export default function DmPage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<DmVariante | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
+  const [regenerating, setRegenerating] = useState(false);
 
   // Free trial state
   const [isFree, setIsFree] = useState(false);
@@ -121,6 +122,31 @@ export default function DmPage() {
       setError(err instanceof Error ? err.message : "Erreur inconnue.");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleRegenerate() {
+    if (!messageClient || !specialite) return;
+    setRegenerating(true);
+    try {
+      const res = await fetch("/api/generate/dm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messageClient,
+          specialite,
+          contexte: contexte || undefined,
+        }),
+      });
+      const body = await res.json();
+      if (res.ok && body.data) {
+        setResult(body.data);
+        posthog.capture("generate_post", { module: "dm", action: "regenerate" });
+      }
+    } catch {
+      // silently ignore
+    } finally {
+      setRegenerating(false);
     }
   }
 
@@ -372,6 +398,8 @@ export default function DmPage() {
               onCopy={handleCopy}
               isFree={isFree}
               freeRemaining={freeRemaining}
+              onRegenerate={handleRegenerate}
+              regenerating={regenerating}
             />
 
             {/* Variante standard */}
@@ -384,6 +412,8 @@ export default function DmPage() {
               onCopy={handleCopy}
               isFree={isFree}
               freeRemaining={freeRemaining}
+              onRegenerate={handleRegenerate}
+              regenerating={regenerating}
             />
 
             {/* Variante premium */}
@@ -396,6 +426,8 @@ export default function DmPage() {
               onCopy={handleCopy}
               isFree={isFree}
               freeRemaining={freeRemaining}
+              onRegenerate={handleRegenerate}
+              regenerating={regenerating}
             />
           </div>
 
@@ -434,7 +466,7 @@ export default function DmPage() {
             </ul>
           </div>
 
-          {/* Transformer ce contenu en clientes */}
+          {/* Workflow — transformer la conversation en contenu */}
           <div
             className="mt-3 rounded-[14px] px-5 py-4"
             style={{
@@ -442,19 +474,27 @@ export default function DmPage() {
               border: "1px solid var(--border)",
             }}
           >
-            <p className="mb-2 text-sm font-semibold" style={{ color: "var(--text)" }}>
-              💡 Transformer ce contenu en clientes
-            </p>
-            <p className="mb-2 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
-              Publie ce contenu puis ajoute en fin de caption :
-            </p>
-            <div
-              className="rounded-[10px] px-4 py-3"
-              style={{ backgroundColor: "var(--surface)", border: "1px solid var(--border)" }}
+            <p
+              className="mb-3 text-xs font-semibold uppercase tracking-wide"
+              style={{ color: "var(--text-muted)" }}
             >
-              <p className="text-sm font-medium" style={{ color: "var(--text)" }}>
-                ✨ Si tu veux un rendez-vous, envoie-moi &ldquo;CILS&rdquo; en DM
-              </p>
+              Transformer cette question en contenu
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <a
+                href={`/dashboard/post?contexte=${encodeURIComponent(messageClient.slice(0, 100))}&from=dm`}
+                className="btn btn-secondary"
+                style={{ fontSize: "0.75rem" }}
+              >
+                📝 Créer un post sur ce sujet
+              </a>
+              <a
+                href={`/dashboard/carousel?sujet=${encodeURIComponent(messageClient.slice(0, 100))}&from=dm`}
+                className="btn btn-secondary"
+                style={{ fontSize: "0.75rem" }}
+              >
+                🖼️ En carrousel éducatif
+              </a>
             </div>
           </div>
 
@@ -493,9 +533,20 @@ interface VarianteCardProps {
   onCopy: (text: string, key: string) => void;
   isFree: boolean;
   freeRemaining: number;
+  onRegenerate: () => void;
+  regenerating: boolean;
 }
 
-function VarianteCard({ label, description, text, colorKey, copied, onCopy, isFree, freeRemaining }: VarianteCardProps) {
+function VarianteCard({ label, description, text, colorKey, copied, onCopy, isFree, freeRemaining, onRegenerate, regenerating }: VarianteCardProps) {
+  const [editedText, setEditedText] = useState(text);
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Sync quand text change (régénération)
+  useEffect(() => {
+    setEditedText(text);
+    setIsEditing(false);
+  }, [text]);
+
   return (
     <div className="card">
       {/* En-tête */}
@@ -509,7 +560,7 @@ function VarianteCard({ label, description, text, colorKey, copied, onCopy, isFr
           </p>
         </div>
         <CopyButton
-          text={text}
+          text={editedText}
           label="Copier"
           isFree={isFree}
           freeRemaining={freeRemaining}
@@ -522,9 +573,43 @@ function VarianteCard({ label, description, text, colorKey, copied, onCopy, isFr
         className="rounded-[10px] px-4 py-3"
         style={{ backgroundColor: "var(--surface-alt)" }}
       >
-        <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: "var(--text)" }}>
-          {text}
-        </p>
+        {isEditing ? (
+          <textarea
+            className="textarea"
+            value={editedText}
+            onChange={(e) => setEditedText(e.target.value)}
+            rows={4}
+            style={{ backgroundColor: "transparent", border: "none", padding: 0, resize: "vertical" }}
+          />
+        ) : (
+          <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: "var(--text)" }}>
+            {editedText}
+          </p>
+        )}
+      </div>
+
+      {/* Barre d'actions */}
+      <div
+        className="mt-3 flex flex-wrap gap-2"
+        style={{ borderTop: "1px solid var(--border)", paddingTop: "0.65rem" }}
+      >
+        <button
+          type="button"
+          className="btn btn-secondary"
+          style={{ fontSize: "0.75rem" }}
+          onClick={() => setIsEditing((v) => !v)}
+        >
+          {isEditing ? "💾 Enregistrer" : "✏️ Modifier"}
+        </button>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          style={{ fontSize: "0.75rem" }}
+          onClick={onRegenerate}
+          disabled={regenerating}
+        >
+          {regenerating ? "⏳ Régénération…" : "🔄 Régénérer"}
+        </button>
       </div>
     </div>
   );
