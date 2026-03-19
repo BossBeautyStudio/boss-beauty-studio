@@ -114,24 +114,24 @@ function ContentPreview({
   content: Record<string, unknown>;
 }) {
   if (module === "post") {
+    const hook = typeof content.hook === "string" ? content.hook : "";
+    const caption = typeof content.caption === "string" ? content.caption : "";
     return (
       <div>
-        {content.hook && (
+        {hook && (
           <p
             className="mb-1 text-sm font-medium"
             style={{ color: "var(--text)", lineHeight: 1.5 }}
           >
-            {String(content.hook).slice(0, 100)}
-            {String(content.hook).length > 100 ? "…" : ""}
+            {hook.slice(0, 100)}{hook.length > 100 ? "…" : ""}
           </p>
         )}
-        {content.caption && (
+        {caption && (
           <p
             className="text-xs"
             style={{ color: "var(--text-muted)", lineHeight: 1.5 }}
           >
-            {String(content.caption).slice(0, 120)}
-            {String(content.caption).length > 120 ? "…" : ""}
+            {caption.slice(0, 120)}{caption.length > 120 ? "…" : ""}
           </p>
         )}
       </div>
@@ -140,11 +140,12 @@ function ContentPreview({
 
   if (module === "carousel") {
     const slides = Array.isArray(content.slides) ? content.slides : [];
+    const titre = typeof content.titre === "string" ? content.titre : "";
     return (
       <div>
-        {content.titre && (
+        {titre && (
           <p className="mb-1 text-sm font-medium" style={{ color: "var(--text)" }}>
-            {String(content.titre)}
+            {titre}
           </p>
         )}
         <p className="text-xs" style={{ color: "var(--text-muted)" }}>
@@ -181,8 +182,10 @@ function ContentPreview({
   if (module === "dm") {
     return (
       <div className="flex flex-col gap-1">
-        {(["courte", "standard", "premium"] as const).map((key) =>
-          content[key] ? (
+        {(["courte", "standard", "premium"] as const).map((key) => {
+          const val = typeof content[key] === "string" ? (content[key] as string) : "";
+          if (!val) return null;
+          return (
             <div key={key}>
               <span
                 className="text-[10px] font-semibold"
@@ -194,12 +197,11 @@ function ContentPreview({
                 className="text-xs leading-relaxed"
                 style={{ color: "var(--text)" }}
               >
-                {String(content[key]).slice(0, 80)}
-                {String(content[key]).length > 80 ? "…" : ""}
+                {val.slice(0, 80)}{val.length > 80 ? "…" : ""}
               </p>
             </div>
-          ) : null
-        )}
+          );
+        })}
       </div>
     );
   }
