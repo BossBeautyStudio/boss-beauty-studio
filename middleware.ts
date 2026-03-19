@@ -20,6 +20,17 @@ const PROTECTED_PATHS = [
 ];
 
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  // ── Fallback PKCE : Supabase redirige parfois le code vers le Site URL (/)
+  // au lieu de /auth/callback. On le renvoie proprement vers le callback.
+  if (pathname === "/" && request.nextUrl.searchParams.get("code")) {
+    const code = request.nextUrl.searchParams.get("code")!;
+    const callbackUrl = new URL("/auth/callback", request.nextUrl.origin);
+    callbackUrl.searchParams.set("code", code);
+    return NextResponse.redirect(callbackUrl);
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   });
@@ -52,8 +63,6 @@ export async function middleware(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  const pathname = request.nextUrl.pathname;
 
   // Vérifier si la route est protégée
   const isProtectedPath = PROTECTED_PATHS.some((path) =>

@@ -8,6 +8,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import LandingDemoInteractive from "@/components/landing/LandingDemoInteractive";
 
 // Toutes les CTAs landing pointent vers l'accès gratuit.
@@ -94,7 +95,18 @@ const FAQ_ITEMS = [
 
 // ── Composant principal ────────────────────────────────────
 
-export default function LandingPage() {
+export default async function LandingPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  // Supabase redirige parfois le code PKCE vers le Site URL (/) au lieu de /auth/callback.
+  // On intercepte ici et on redirige proprement avant même d'afficher la landing page.
+  const params = await searchParams;
+  const code = typeof params.code === "string" ? params.code : null;
+  if (code) {
+    redirect(`/auth/callback?code=${code}`);
+  }
   return (
     <div className="pb-[72px] lg:pb-0" style={{ backgroundColor: "var(--bg)", minHeight: "100dvh" }}>
 
