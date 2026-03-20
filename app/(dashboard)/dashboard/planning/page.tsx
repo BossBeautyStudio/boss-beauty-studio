@@ -497,6 +497,13 @@ export default function PlanningPage() {
                     >
                       ⚡ Accroches
                     </a>
+                    <a
+                      href={`/dashboard/calendar`}
+                      className="btn btn-secondary"
+                      style={{ fontSize: "0.7rem", padding: "0.25rem 0.65rem" }}
+                    >
+                      🗓️ Planifier
+                    </a>
                   </div>
                 </div>
               );
