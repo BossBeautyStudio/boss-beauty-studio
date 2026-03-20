@@ -3,7 +3,26 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const NAV_ITEMS = [
+// ── Structure ─────────────────────────────────────────────────────────────────
+// Deux types d'items : séparateur de section ou lien de navigation.
+
+type NavSection = { section: string };
+type NavLink = {
+  label: string;
+  href: string;
+  icon: React.ReactNode;
+};
+type NavItem = NavSection | NavLink;
+
+function isSection(item: NavItem): item is NavSection {
+  return "section" in item;
+}
+
+// ── Items ─────────────────────────────────────────────────────────────────────
+
+const NAV_ITEMS: NavItem[] = [
+  // ── Créer ────────────────────────────────────────────────────────────────
+  { section: "Créer" },
   {
     label: "Post Instagram",
     href: "/dashboard/post",
@@ -11,33 +30,6 @@ const NAV_ITEMS = [
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="3" width="18" height="18" rx="3" />
         <path d="M8 12h8M12 8v8" />
-      </svg>
-    ),
-  },
-  {
-    label: "Planning",
-    href: "/dashboard/planning",
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="2" />
-        <line x1="16" y1="2" x2="16" y2="6" />
-        <line x1="8" y1="2" x2="8" y2="6" />
-        <line x1="3" y1="10" x2="21" y2="10" />
-      </svg>
-    ),
-  },
-  {
-    label: "Calendrier",
-    href: "/dashboard/calendar",
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="2" />
-        <line x1="16" y1="2" x2="16" y2="6" />
-        <line x1="8" y1="2" x2="8" y2="6" />
-        <line x1="3" y1="10" x2="21" y2="10" />
-        <circle cx="8" cy="15" r="1" fill="currentColor" stroke="none" />
-        <circle cx="12" cy="15" r="1" fill="currentColor" stroke="none" />
-        <circle cx="16" cy="15" r="1" fill="currentColor" stroke="none" />
       </svg>
     ),
   },
@@ -64,6 +56,15 @@ const NAV_ITEMS = [
     ),
   },
   {
+    label: "Accroches",
+    href: "/dashboard/hooks",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+      </svg>
+    ),
+  },
+  {
     label: "Réponse DM",
     href: "/dashboard/dm",
     icon: (
@@ -72,15 +73,37 @@ const NAV_ITEMS = [
       </svg>
     ),
   },
+
+  // ── Organiser ────────────────────────────────────────────────────────────
+  { section: "Organiser" },
   {
-    label: "Accroches Instagram",
-    href: "/dashboard/hooks",
+    label: "Idées de la semaine",
+    href: "/dashboard/planning",
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+        <path d="M12 20h9" />
+        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
       </svg>
     ),
   },
+  {
+    label: "Mon calendrier",
+    href: "/dashboard/calendar",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+        <circle cx="8" cy="15" r="1" fill="currentColor" stroke="none" />
+        <circle cx="12" cy="15" r="1" fill="currentColor" stroke="none" />
+        <circle cx="16" cy="15" r="1" fill="currentColor" stroke="none" />
+      </svg>
+    ),
+  },
+
+  // ── Mon espace ───────────────────────────────────────────────────────────
+  { section: "Mon espace" },
   {
     label: "Mes créations",
     href: "/dashboard/library",
@@ -95,29 +118,33 @@ const NAV_ITEMS = [
     href: "/dashboard/settings",
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="3" />
-        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-      </svg>
-    ),
-  },
-  {
-    label: "Historique",
-    href: "/dashboard/history",
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10" />
-        <polyline points="12 6 12 12 16 14" />
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
       </svg>
     ),
   },
 ];
 
+// ── Composant ─────────────────────────────────────────────────────────────────
+
 export function SidebarNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-col gap-1">
-      {NAV_ITEMS.map((item) => {
+    <nav className="flex flex-col gap-0.5">
+      {NAV_ITEMS.map((item, idx) => {
+        if (isSection(item)) {
+          return (
+            <p
+              key={`section-${idx}`}
+              className="mt-4 mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest"
+              style={{ color: "#BBBBBB" }}
+            >
+              {item.section}
+            </p>
+          );
+        }
+
         const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
         return (
           <Link
