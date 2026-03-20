@@ -31,12 +31,20 @@ export default function LoginPage() {
 
   const supabase = createClient();
 
-  // Lire le ?error= dans l'URL au montage (après redirect depuis /auth/callback)
+  // Lire le ?error= et ?ref= dans l'URL au montage
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+
+    // Erreur de connexion
     const err = params.get("error");
     if (err && URL_ERROR_MESSAGES[err]) {
       setUrlError(URL_ERROR_MESSAGES[err]);
+    }
+
+    // Code de parrainage → stocker en cookie 30 jours
+    const ref = params.get("ref");
+    if (ref && /^[A-Z0-9]{6,12}$/.test(ref)) {
+      document.cookie = `bbs_ref=${ref}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
     }
   }, []);
 

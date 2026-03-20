@@ -28,6 +28,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { MONTHLY_LIMIT } from "@/lib/quota";
+import { convertReferral } from "@/lib/referral";
 import {
   verifyStripeWebhook,
   mapStripeSubscriptionStatus,
@@ -222,13 +223,23 @@ export async function POST(req: NextRequest) {
           // Non-bloquant — on active quand même sans la date
         }
 
-        await activateUser(supabase, {
+        const activation = await activateUser(supabase, {
           userId,
           email,
           stripeCustomerId,
           stripeSubscriptionId,
           currentPeriodEnd,
         });
+
+        // ── Convertir le referral si l'activation a réussi ───
+        if (activation.activated && userId) {
+          try {
+            await convertReferral(userId);
+          } catch (refErr) {
+            // Non-bloquant — on ne fait pas échouer le webhook pour ça
+            console.error("[webhook/stripe] convertReferral:", refErr);
+          }
+        }
         break;
       }
 

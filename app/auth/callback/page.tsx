@@ -67,7 +67,7 @@ export default function AuthCallbackPage() {
 
     supabase.auth
       .exchangeCodeForSession(code)
-      .then(({ data, error }) => {
+      .then(async ({ data, error }) => {
         if (error) {
           console.error(
             "[auth/callback] exchangeCodeForSession error:",
@@ -85,10 +85,32 @@ export default function AuthCallbackPage() {
           if (data?.user) {
             const createdAt = new Date(data.user.created_at).getTime();
             const isNewUser = Date.now() - createdAt < 30_000;
+
             if (isNewUser) {
               posthog.capture("user_signup", {
                 email: data.user.email,
               });
+
+              // ── Claim referral si cookie bbs_ref présent ──────
+              const refMatch = document.cookie
+                .split("; ")
+                .find((c) => c.startsWith("bbs_ref="));
+              const refCode = refMatch?.split("=")?.[1];
+
+              if (refCode) {
+                try {
+                  await fetch("/api/referral/claim", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ code: refCode }),
+                  });
+                  // Supprimer le cookie après usage
+                  document.cookie =
+                    "bbs_ref=; path=/; max-age=0; SameSite=Lax";
+                } catch {
+                  // Non-bloquant
+                }
+              }
             }
           }
           // Session stockée en cookies par createBrowserClient
