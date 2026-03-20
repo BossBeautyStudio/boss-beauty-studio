@@ -55,11 +55,15 @@ const AVIS = [
 // ── Features pricing ───────────────────────────────────────
 
 const FEATURES_PRICING = [
-  "Planning Instagram — 7 posts par semaine",
-  "Carrousel Instagram avec guide Canva",
+  "Post Instagram — 7 types de contenu",
+  "Carrousel Instagram + guide Canva gratuit",
+  "Story & Reel — script + templates Canva",
+  "Accroches Instagram — 10 hooks percutants",
   "Réponse DM — 3 variantes par message",
-  "Accroches Instagram — 10 accroches percutantes",
-  "Historique de toutes tes générations",
+  "Idées de la semaine — 7 posts en 5 sec",
+  "Calendrier de publication personnel",
+  "Profil de marque — pré-remplissage auto",
+  "Bibliothèque de tes créations sauvegardées",
   "Contenu 100 % adapté à ta spécialité",
 ];
 
@@ -82,9 +86,14 @@ const FAQ_ITEMS = [
       "ChatGPT est un outil généraliste : il génère du contenu pour tout le monde, sans contexte ni spécialisation. Boss Beauty Studio est entraîné uniquement sur la niche beauté Instagram. Le résultat est directement utilisable — pas besoin de reformuler ou de corriger.",
   },
   {
-    question: "Combien de temps faut-il pour générer un planning ?",
+    question: "Combien de temps faut-il pour générer du contenu ?",
     reponse:
-      "En quelques secondes. Tu saisis ta spécialité, tu cliques sur 'Générer', et tu obtiens un planning de 7 posts pour la semaine — thèmes, format (post, carrousel, reel) et idée de contenu — prêts à développer.",
+      "Quelques secondes suffisent. Un planning de 7 idées : ~5 sec. Un post complet : ~10 sec. Un carrousel slide par slide : ~15 sec. Un script Reel ou une séquence Stories : ~12 sec. Tu saisis ta spécialité, tu cliques, c'est prêt.",
+  },
+  {
+    question: "Le module Story & Reel fonctionne comment ?",
+    reponse:
+      "Tu choisis entre une séquence Stories (4-5 slides avec texte, visuel suggéré et CTA) ou un script Reel (accroche, scènes avec durée et overlay, légende et idée musicale). Tu reçois aussi 3 liens directs vers des templates Canva gratuits adaptés à chaque format.",
   },
   {
     question: "Puis-je annuler à tout moment ?",
@@ -180,7 +189,7 @@ export default async function LandingPage({
                 color: "var(--accent)",
               }}
             >
-              ✦ Pensé pour les professionnelles beauté indépendantes
+              ✦ 7 outils · Pensé pour les professionnelles beauté indépendantes
             </div>
 
             {/* H1 */}
@@ -199,8 +208,8 @@ export default async function LandingPage({
               className="mb-7 mx-auto max-w-[420px] text-center text-base leading-relaxed lg:mx-0 lg:text-left lg:text-lg"
               style={{ color: "var(--text-muted)" }}
             >
-              Boss Beauty Studio génère tes posts Instagram et t&apos;aide
-              à attirer des clientes automatiquement.
+              Posts, carrousels, stories, scripts reels, accroches, réponses DM —
+              tout ce qu&apos;il faut pour attirer des clientes, généré en quelques secondes.
             </p>
 
             {/* CTA principal */}
@@ -220,7 +229,7 @@ export default async function LandingPage({
             >
               {[
                 "✓ 2 générations gratuites",
-                "✓ Aucune compétence requise",
+                "✓ 7 modules inclus",
                 "✓ Sans carte bancaire",
               ].map((item) => (
                 <span
@@ -291,6 +300,48 @@ export default async function LandingPage({
           </div>
         </div>
       </section>
+
+      {/* ══════════════════════════════════════════════════════
+          MODULES STRIP — bande rapide des 7 outils
+      ══════════════════════════════════════════════════════ */}
+      <div
+        className="overflow-x-auto"
+        style={{
+          backgroundColor: "var(--surface)",
+          borderBottom: "1px solid var(--border)",
+        }}
+      >
+        <div
+          className="mx-auto flex items-center gap-2 px-5 py-4"
+          style={{ maxWidth: "1080px", minWidth: "max-content" }}
+        >
+          <p className="shrink-0 text-xs font-semibold uppercase tracking-widest mr-2" style={{ color: "var(--text-muted)" }}>
+            Inclus :
+          </p>
+          {[
+            { emoji: "📝", label: "Post Instagram" },
+            { emoji: "🖼️", label: "Carrousel" },
+            { emoji: "📱", label: "Story & Reel" },
+            { emoji: "⚡", label: "Accroches" },
+            { emoji: "💬", label: "Réponse DM" },
+            { emoji: "📅", label: "Idées semaine" },
+            { emoji: "🗓️", label: "Calendrier" },
+          ].map((m, i) => (
+            <span
+              key={m.label}
+              className="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium"
+              style={{
+                backgroundColor: i === 0 ? "rgba(181,122,140,0.1)" : "var(--surface-alt)",
+                border: i === 0 ? "1px solid rgba(181,122,140,0.3)" : "1px solid var(--border)",
+                color: i === 0 ? "var(--accent)" : "var(--text)",
+              }}
+            >
+              <span>{m.emoji}</span>
+              {m.label}
+            </span>
+          ))}
+        </div>
+      </div>
 
       {/* ══════════════════════════════════════════════════════
           2 — PROBLÈME
@@ -589,10 +640,13 @@ export default async function LandingPage({
 
             <ul className="flex flex-col gap-3">
               {[
-                { icon: "📅", label: "Idées de posts" },
-                { icon: "✍️", label: "Textes de posts" },
-                { icon: "⚡", label: "Accroches Instagram" },
-                { icon: "💬", label: "Réponses DM" },
+                { icon: "📝", label: "Post Instagram — prêt à publier" },
+                { icon: "🖼️", label: "Carrousel + guide Canva inclus" },
+                { icon: "📱", label: "Story & Reel — script + templates" },
+                { icon: "⚡", label: "Accroches qui stoppent le scroll" },
+                { icon: "💬", label: "Réponses DM qui convertissent" },
+                { icon: "📅", label: "Idées de la semaine — 7 posts en 5 sec" },
+                { icon: "🗓️", label: "Calendrier de publication personnel" },
               ].map((f) => (
                 <li key={f.label} className="flex items-center gap-3">
                   <span
