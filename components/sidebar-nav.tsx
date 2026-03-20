@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LogoutButton } from "@/components/dashboard/LogoutButton";
 
 // ── Structure ─────────────────────────────────────────────────────────────────
 // Deux types d'items : séparateur de section ou lien de navigation.
@@ -131,37 +132,69 @@ export function SidebarNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-col gap-0.5">
-      {NAV_ITEMS.map((item, idx) => {
-        if (isSection(item)) {
-          return (
-            <p
-              key={`section-${idx}`}
-              className="mt-4 mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest"
-              style={{ color: "#BBBBBB" }}
-            >
-              {item.section}
-            </p>
-          );
-        }
+    <div className="flex flex-col h-full">
 
-        const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={[
-              "flex items-center gap-3 rounded-[12px] px-3 py-2.5 text-sm font-medium transition-colors",
-              isActive
-                ? "bg-[#111111] text-white"
-                : "text-[#555555] hover:bg-[#E8E3DF] hover:text-[#111111]",
-            ].join(" ")}
-          >
-            <span className="shrink-0">{item.icon}</span>
-            {item.label}
-          </Link>
-        );
-      })}
-    </nav>
+      {/* Bouton Accueil */}
+      <Link
+        href="/dashboard"
+        className={[
+          "mb-3 flex items-center gap-3 rounded-[12px] px-3 py-2.5 text-sm font-semibold transition-colors",
+          pathname === "/dashboard"
+            ? "bg-[#111111] text-white"
+            : "text-[#333333] hover:bg-[#E8E3DF] hover:text-[#111111]",
+        ].join(" ")}
+        style={{
+          border: pathname === "/dashboard" ? "none" : "1px solid var(--border)",
+        }}
+      >
+        <span className="shrink-0">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9.5L12 3l9 6.5V21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
+            <path d="M9 22V12h6v10" />
+          </svg>
+        </span>
+        Accueil
+      </Link>
+
+      {/* Navigation principale */}
+      <nav className="flex flex-col gap-0.5 flex-1">
+        {NAV_ITEMS.map((item, idx) => {
+          if (isSection(item)) {
+            return (
+              <p
+                key={`section-${idx}`}
+                className="mt-4 mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest"
+                style={{ color: "#BBBBBB" }}
+              >
+                {item.section}
+              </p>
+            );
+          }
+
+          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={[
+                "flex items-center gap-3 rounded-[12px] px-3 py-2.5 text-sm font-medium transition-colors",
+                isActive
+                  ? "bg-[#111111] text-white"
+                  : "text-[#555555] hover:bg-[#E8E3DF] hover:text-[#111111]",
+              ].join(" ")}
+            >
+              <span className="shrink-0">{item.icon}</span>
+              {item.label}
+            </Link>
+          );
+        })}
+
+        {/* Séparateur + Déconnexion */}
+        <div className="mt-4 pt-3" style={{ borderTop: "1px solid var(--border)" }}>
+          <LogoutButton />
+        </div>
+      </nav>
+
+    </div>
   );
 }

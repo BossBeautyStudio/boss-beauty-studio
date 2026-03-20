@@ -22,6 +22,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LogoutButton } from "@/components/dashboard/LogoutButton";
 
 // ── Structure ─────────────────────────────────────────────────────────────────
 
@@ -263,6 +264,28 @@ export function MobileNav({ userEmail }: MobileNavProps) {
 
             {/* Items de navigation */}
             <nav className="flex-1 overflow-y-auto px-3 py-4">
+              {/* Bouton Accueil */}
+              <Link
+                href="/dashboard"
+                className={[
+                  "mb-3 flex items-center gap-3 rounded-[12px] px-3 py-3 text-sm font-semibold transition-colors",
+                  pathname === "/dashboard"
+                    ? "bg-[#111111] text-white"
+                    : "text-[#333333] hover:bg-[#E8E3DF] hover:text-[#111111]",
+                ].join(" ")}
+                style={{
+                  border: pathname === "/dashboard" ? "none" : "1px solid var(--border)",
+                }}
+              >
+                <span className="shrink-0">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 9.5L12 3l9 6.5V21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z" />
+                    <path d="M9 22V12h6v10" />
+                  </svg>
+                </span>
+                Accueil
+              </Link>
+
               <div className="flex flex-col gap-0.5">
                 {NAV_ITEMS.map((item, idx) => {
                   if (isSection(item)) {
@@ -298,12 +321,13 @@ export function MobileNav({ userEmail }: MobileNavProps) {
               </div>
             </nav>
 
-            {/* Email utilisateur en bas */}
+            {/* Pied du drawer : email + déconnexion */}
             <div
               className="px-4 py-4"
               style={{ borderTop: "1px solid var(--border)" }}
             >
-              <div className="flex items-center gap-2.5">
+              {/* Email */}
+              <div className="flex items-center gap-2.5 mb-3">
                 <div
                   className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-white"
                   style={{ backgroundColor: "var(--accent)" }}
@@ -317,6 +341,8 @@ export function MobileNav({ userEmail }: MobileNavProps) {
                   {userEmail}
                 </p>
               </div>
+              {/* Déconnexion */}
+              <LogoutButton />
             </div>
           </div>
         </div>

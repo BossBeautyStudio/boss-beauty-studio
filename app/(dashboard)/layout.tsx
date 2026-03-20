@@ -31,6 +31,22 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
+  // Onboarding — redirige si le profil de marque est vide (première connexion)
+  try {
+    const { data: brandProfile } = await supabase
+      .from("brand_profiles")
+      .select("specialite")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    // Pas de profil du tout → première connexion → onboarding
+    if (brandProfile === null) {
+      redirect("/onboarding");
+    }
+  } catch {
+    // Non critique — on laisse passer si erreur DB
+  }
+
   // Quota — lecture silencieuse, ne bloque pas le layout si erreur
   let quota = null;
   try {
