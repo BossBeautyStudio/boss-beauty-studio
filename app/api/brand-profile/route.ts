@@ -51,6 +51,7 @@ export async function POST(request: Request) {
     ville?: string;
     services?: string;
     prix_moyen?: string;
+    reminders_enabled?: boolean;
   };
 
   try {
@@ -63,16 +64,19 @@ export async function POST(request: Request) {
     .from("brand_profiles")
     .upsert(
       {
-        user_id:           user.id,
-        nom_marque:        body.nom_marque        ?? null,
-        specialite:        body.specialite        ?? null,
-        ton_style:         body.ton_style         ?? null,
-        public_cible:      body.public_cible      ?? null,
-        hashtags_favoris:  body.hashtags_favoris  ?? null,
-        instagram_handle:  body.instagram_handle  ?? null,
-        ville:             body.ville             ?? null,
-        services:          body.services          ?? null,
-        prix_moyen:        body.prix_moyen        ?? null,
+        user_id:            user.id,
+        nom_marque:         body.nom_marque         ?? null,
+        specialite:         body.specialite         ?? null,
+        ton_style:          body.ton_style          ?? null,
+        public_cible:       body.public_cible       ?? null,
+        hashtags_favoris:   body.hashtags_favoris   ?? null,
+        instagram_handle:   body.instagram_handle   ?? null,
+        ville:              body.ville              ?? null,
+        services:           body.services           ?? null,
+        prix_moyen:         body.prix_moyen         ?? null,
+        ...(body.reminders_enabled !== undefined && {
+          reminders_enabled: body.reminders_enabled,
+        }),
       },
       { onConflict: "user_id" }
     )

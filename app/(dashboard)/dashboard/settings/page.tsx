@@ -63,6 +63,7 @@ interface ProfileForm {
   tonStyle:         string;
   publicCible:      string;
   hashtagsTags:     string[];
+  remindersEnabled: boolean;
 }
 
 const EMPTY_FORM: ProfileForm = {
@@ -75,6 +76,7 @@ const EMPTY_FORM: ProfileForm = {
   tonStyle:         "",
   publicCible:      "",
   hashtagsTags:     [],
+  remindersEnabled: true,
 };
 
 // ── Calcul de complétion ─────────────────────────────────────────────────────
@@ -135,6 +137,7 @@ export default function SettingsPage() {
             tonStyle:         data.ton_style         ?? "",
             publicCible:      data.public_cible      ?? "",
             hashtagsTags:     parseTags(data.hashtags_favoris),
+            remindersEnabled: data.reminders_enabled !== false,
           };
           setForm(loaded);
           // Si la spécialité n'est pas dans la liste prédéfinie, c'est un custom
@@ -209,6 +212,7 @@ export default function SettingsPage() {
             hashtags_favoris: form.hashtagsTags
                                 .map((h) => `#${h}`)
                                 .join(" ")               || null,
+            reminders_enabled: form.remindersEnabled,
           }),
         });
         if (!res.ok) throw new Error();
@@ -658,6 +662,72 @@ export default function SettingsPage() {
                 Tape un hashtag et appuie sur Entrée ou Espace pour l&apos;ajouter
               </p>
             </div>
+          </div>
+        </section>
+
+        {/* ── Section 4 : Notifications ───────────────────────── */}
+        <section>
+          <div className="mb-4 flex items-center gap-2">
+            <span className="text-base">🔔</span>
+            <h2 className="text-sm font-semibold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+              Notifications
+            </h2>
+          </div>
+
+          <div
+            className="rounded-[16px] p-5"
+            style={{ backgroundColor: "var(--surface)", border: "1px solid var(--border)" }}
+          >
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold" style={{ color: "var(--text)" }}>
+                  Rappels de publication
+                </p>
+                <p className="text-xs mt-1 leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                  Reçois un email la veille de chaque publication planifiée dans Mon calendrier.
+                </p>
+              </div>
+
+              {/* Toggle switch */}
+              <button
+                type="button"
+                role="switch"
+                aria-checked={form.remindersEnabled}
+                onClick={() => { update("remindersEnabled", !form.remindersEnabled); }}
+                className="relative shrink-0 transition-colors duration-200"
+                style={{
+                  width: "44px",
+                  height: "24px",
+                  borderRadius: "100px",
+                  backgroundColor: form.remindersEnabled ? "var(--accent)" : "var(--border)",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: 0,
+                }}
+              >
+                <span
+                  className="absolute top-[2px] transition-transform duration-200"
+                  style={{
+                    width: "20px",
+                    height: "20px",
+                    borderRadius: "50%",
+                    backgroundColor: "#fff",
+                    boxShadow: "0 1px 4px rgba(0,0,0,0.2)",
+                    left: form.remindersEnabled ? "22px" : "2px",
+                    display: "block",
+                  }}
+                />
+              </button>
+            </div>
+
+            {form.remindersEnabled && (
+              <p
+                className="mt-3 text-xs rounded-[10px] px-3 py-2"
+                style={{ backgroundColor: "rgba(181,122,140,0.08)", color: "var(--accent)" }}
+              >
+                ✓ Rappels activés — email envoyé chaque matin à 8h pour les publications du lendemain
+              </p>
+            )}
           </div>
         </section>
 
