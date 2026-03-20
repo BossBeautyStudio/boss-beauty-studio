@@ -17,6 +17,8 @@ import { POST_TYPES, type PostOutput } from "@/lib/prompts";
 import { FreeTrialBanner, CopyButton, PaywallBanner } from "@/components/dashboard/FreePaywall";
 import { WhatsAppCTA } from "@/components/dashboard/WhatsAppCTA";
 import { SaveButton } from "@/components/dashboard/SaveButton";
+import { ExportPDFButton } from "@/components/dashboard/ExportPDFButton";
+import { exportPostPDF } from "@/lib/exportPDF";
 import { useBrandProfile } from "@/hooks/useBrandProfile";
 
 // ── Types partagés ────────────────────────────────────────────────────────────
@@ -698,6 +700,23 @@ function PostResult({
                 ideeReel: result.ideeReel ?? null,
               }}
               params={params ? (params as unknown as Record<string, unknown>) : undefined}
+            />
+            <ExportPDFButton
+              onExport={() =>
+                exportPostPDF(
+                  {
+                    hook: editedHook,
+                    caption: editedCaption,
+                    hashtags: result.hashtags,
+                    ideeStory: result.ideeStory,
+                    ideeReel: result.ideeReel ?? null,
+                  },
+                  {
+                    typePost: selectedType.label,
+                    specialite: params?.specialite ?? "",
+                  }
+                )
+              }
             />
           </div>
         </div>

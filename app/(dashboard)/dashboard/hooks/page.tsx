@@ -13,6 +13,8 @@ import { useRouter } from "next/navigation";
 import { FreeTrialBanner, CopyButton, PaywallBanner } from "@/components/dashboard/FreePaywall";
 import { WhatsAppCTA } from "@/components/dashboard/WhatsAppCTA";
 import { SaveButton } from "@/components/dashboard/SaveButton";
+import { ExportPDFButton } from "@/components/dashboard/ExportPDFButton";
+import { exportHooksPDF } from "@/lib/exportPDF";
 import { useBrandProfile } from "@/hooks/useBrandProfile";
 
 interface HookItem {
@@ -576,7 +578,7 @@ export default function HooksPage() {
             ))}
           </div>
 
-          {/* Barre d'actions globale — sauvegarder */}
+          {/* Barre d'actions globale — sauvegarder / exporter */}
           <div
             className="mt-4 flex flex-wrap items-center gap-2"
             style={{ borderTop: "1px solid var(--border)", paddingTop: "0.75rem" }}
@@ -586,6 +588,11 @@ export default function HooksPage() {
               title={`Hooks ${typeContenu}${specialite ? ` — ${specialite}` : ""}`}
               content={{ hooks: result.hooks }}
               params={{ specialite, typeContenu, tonStyle }}
+            />
+            <ExportPDFButton
+              onExport={() =>
+                exportHooksPDF(result.hooks, { specialite, typeContenu })
+              }
             />
           </div>
 

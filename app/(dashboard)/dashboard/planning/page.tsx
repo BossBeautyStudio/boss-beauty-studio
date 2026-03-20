@@ -12,6 +12,8 @@ import posthog from "posthog-js";
 import { useRouter } from "next/navigation";
 import { FreeTrialBanner, PaywallBanner } from "@/components/dashboard/FreePaywall";
 import { WhatsAppCTA } from "@/components/dashboard/WhatsAppCTA";
+import { ExportPDFButton } from "@/components/dashboard/ExportPDFButton";
+import { exportPlanningPDF } from "@/lib/exportPDF";
 
 interface PlanningPost {
   jour: number;
@@ -399,16 +401,27 @@ export default function PlanningPage() {
       {/* Résultat */}
       {result && (
         <div className="slide-up">
-          <div className="mb-6 flex items-center justify-between">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-lg font-semibold" style={{ color: "var(--text)" }}>
               Ton planning — 7 jours
             </h2>
-            <button
-              className="btn btn-secondary"
-              onClick={() => setResult(null)}
-            >
-              Nouvelle semaine
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <ExportPDFButton
+                onExport={() =>
+                  exportPlanningPDF(result.posts, {
+                    specialite,
+                    objectif: objectifFinal,
+                    dateDebut,
+                  })
+                }
+              />
+              <button
+                className="btn btn-secondary"
+                onClick={() => setResult(null)}
+              >
+                Nouvelle semaine
+              </button>
+            </div>
           </div>
 
           {/* Légende formats */}

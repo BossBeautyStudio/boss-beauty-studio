@@ -13,6 +13,8 @@ import { useRouter } from "next/navigation";
 import { FreeTrialBanner, CopyButton, PaywallBanner } from "@/components/dashboard/FreePaywall";
 import { WhatsAppCTA } from "@/components/dashboard/WhatsAppCTA";
 import { SaveButton } from "@/components/dashboard/SaveButton";
+import { ExportPDFButton } from "@/components/dashboard/ExportPDFButton";
+import { exportCarouselPDF } from "@/lib/exportPDF";
 import { useBrandProfile } from "@/hooks/useBrandProfile";
 
 interface CarouselSlide {
@@ -644,6 +646,20 @@ export default function CarouselPage() {
                   cta: result.cta,
                 }}
                 params={{ sujet, specialite, nombreSlides, tonStyle, publicCible: publicCible || undefined }}
+              />
+              <ExportPDFButton
+                onExport={() =>
+                  exportCarouselPDF(
+                    {
+                      titre: result.titre,
+                      slides: result.slides,
+                      caption: editedCaption || result.caption,
+                      hashtags: result.hashtags,
+                      cta: result.cta,
+                    },
+                    { specialite, sujet }
+                  )
+                }
               />
             </div>
 
