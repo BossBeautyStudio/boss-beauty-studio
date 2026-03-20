@@ -19,7 +19,7 @@ import Link from "next/link";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type SaveModule = "post" | "carousel" | "hooks" | "dm";
+type SaveModule = "post" | "carousel" | "hooks" | "dm" | "story" | "reel";
 
 interface SavedItem {
   id: string;
@@ -37,6 +37,8 @@ const MODULE_LABELS: Record<SaveModule, string> = {
   carousel: "Carrousel",
   hooks: "Accroches",
   dm: "Réponse DM",
+  story: "Stories",
+  reel: "Script Reel",
 };
 
 const MODULE_ICONS: Record<SaveModule, string> = {
@@ -44,6 +46,8 @@ const MODULE_ICONS: Record<SaveModule, string> = {
   carousel: "🖼️",
   hooks: "⚡",
   dm: "💬",
+  story: "📱",
+  reel: "🎬",
 };
 
 const MODULE_COLORS: Record<SaveModule, string> = {
@@ -51,6 +55,8 @@ const MODULE_COLORS: Record<SaveModule, string> = {
   carousel: "#7a9cb5",
   hooks: "#b59a4a",
   dm: "#7ab58a",
+  story: "#9b7fd4",
+  reel: "#6b9fd4",
 };
 
 function formatDate(iso: string): string {

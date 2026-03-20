@@ -2,20 +2,25 @@
 // lib/prompts.ts — Configuration modèles + prompts Boss Beauty Studio
 //
 // Exports principaux :
-//   MODEL_CONFIG        — modèle + maxTokens par module (cohérent avec claude.ts)
-//   Types output        — PlanningOutput, CarouselOutput, DMOutput, HooksOutput, PostOutput
-//   Types params        — PlanningParams, CarouselParams, DMParams, HooksParams, PostParams
-//   POST_TYPES          — catalogue des 7 types de posts avec exemples réels
-//   SYSTEM_PLANNING     — prompt système module planning 30 jours
-//   SYSTEM_CAROUSEL     — prompt système module carrousel
-//   SYSTEM_DM           — prompt système module réponse DM
-//   SYSTEM_HOOKS        — prompt système module hooks
-//   SYSTEM_POST         — prompt système module post unique (typePost)
-//   buildPlanningPrompt — builder → ClaudeCallParams pour callClaudeJSON
-//   buildCarouselPrompt — builder → ClaudeCallParams pour callClaudeJSON
-//   buildDMPrompt       — builder → ClaudeCallParams pour callClaudeJSON
-//   buildHooksPrompt    — builder → ClaudeCallParams pour callClaudeJSON
-//   buildPostPrompt     — builder → ClaudeCallParams pour callClaudeJSON
+//   MODEL_CONFIG          — modèle + maxTokens par module (cohérent avec claude.ts)
+//   Types output          — PlanningOutput, CarouselOutput, DMOutput, HooksOutput, PostOutput
+//                           StoryOutput, ReelOutput, StoryReelOutput
+//   Types params          — PlanningParams, CarouselParams, DMParams, HooksParams, PostParams
+//                           StoryReelParams, StoryReelMode
+//   POST_TYPES            — catalogue des 7 types de posts avec exemples réels
+//   SYSTEM_PLANNING       — prompt système module planning
+//   SYSTEM_CAROUSEL       — prompt système module carrousel
+//   SYSTEM_DM             — prompt système module réponse DM
+//   SYSTEM_HOOKS          — prompt système module hooks
+//   SYSTEM_POST           — prompt système module post unique (typePost)
+//   SYSTEM_STORY          — prompt système module Story Instagram
+//   SYSTEM_REEL           — prompt système module Reel Instagram
+//   buildPlanningPrompt   — builder → ClaudeCallParams
+//   buildCarouselPrompt   — builder → ClaudeCallParams
+//   buildDMPrompt         — builder → ClaudeCallParams
+//   buildHooksPrompt      — builder → ClaudeCallParams
+//   buildPostPrompt       — builder → ClaudeCallParams
+//   buildStoryReelPrompt  — builder → ClaudeCallParams (Story ou Reel selon mode)
 // ============================================================
 
 import { MODEL } from "./claude";
@@ -48,6 +53,14 @@ export const MODEL_CONFIG = {
   post: {
     model: MODEL.haiku,
     maxTokens: 600, // 1 post — hook + caption + hashtags + story + reel
+  },
+  story: {
+    model: MODEL.haiku,
+    maxTokens: 900, // 4-5 slides × ~120 tokens + hashtags + cta
+  },
+  reel: {
+    model: MODEL.haiku,
+    maxTokens: 1000, // 4-5 scènes × ~120 tokens + caption + hashtags
   },
 } as const;
 
@@ -636,4 +649,174 @@ Génère le post en JSON uniquement.`;
     prompt,
     maxTokens: MODEL_CONFIG.post.maxTokens,
   };
+}
+
+// ── Module Story / Reel Instagram — types, prompts, builders ──────────────────
+
+/** Mode de génération */
+export type StoryReelMode = "story" | "reel";
+
+/** Paramètres utilisateur du module Story/Reel */
+export interface StoryReelParams {
+  mode: StoryReelMode;
+  specialite: string;  // ex: "onglerie", "esthétique"
+  sujet: string;       // ex: "5 erreurs à éviter", "avant/après manucure"
+  tonStyle: string;    // ex: "Chaleureux et proche"
+}
+
+// ── Story ─────────────────────────────────────────────────────────────────────
+
+/** Une slide de Story Instagram */
+export interface StorySlide {
+  numero: number;  // 1 à 5
+  texte: string;   // texte court affiché sur la slide (max 15 mots)
+  visuel: string;  // description concrète du visuel à filmer/photographier
+  emoji: string;   // 1 emoji pertinent
+}
+
+/** Sortie complète du module Story */
+export interface StoryOutput {
+  titre: string;         // titre interne de la série (non publié)
+  slides: StorySlide[];  // 4 à 5 slides
+  hashtags: string[];    // 5 à 8 hashtags
+  cta: string;           // CTA pour la dernière slide
+}
+
+// ── Reel ──────────────────────────────────────────────────────────────────────
+
+/** Une scène du script Reel */
+export interface ReelScene {
+  numero: number;  // 1 à 5
+  duree: string;   // durée estimée ("3s", "5s"…)
+  action: string;  // ce que tu filmes / ce que tu fais
+  overlay: string; // texte affiché à l'écran (5-8 mots max)
+}
+
+/** Sortie complète du module Reel */
+export interface ReelOutput {
+  accroche: string;     // hook des 3 premières secondes
+  scenes: ReelScene[];  // 4 à 5 scènes
+  caption: string;      // caption du post Reel
+  hashtags: string[];   // 5 à 8 hashtags
+  musique: string;      // style de musique suggéré
+}
+
+/** Union discriminée utile côté API */
+export type StoryReelOutput = StoryOutput | ReelOutput;
+
+// ── Prompts système ───────────────────────────────────────────────────────────
+
+export const SYSTEM_STORY = `Tu es une professionnelle de la beauté indépendante qui crée des Stories Instagram engageantes et convertissantes.
+
+Ta mission : créer une séquence de 4 à 5 Stories Instagram pour une professionnelle de la beauté (coiffure, esthétique, onglerie, maquillage, extensions de cils).
+
+Règles impératives pour les Stories :
+- Chaque slide a UN seul message clair — maximum 15 mots.
+- La première slide accroche immédiatement : question, chiffre, promesse, urgence.
+- La progression doit créer de la curiosité pour passer à la slide suivante.
+- La dernière slide est TOUJOURS un CTA : "Envoie-moi [MOT] en DM" ou "Réserve ta place — DM".
+- Le visuel doit être filmable seul avec un smartphone, dans un cadre professionnel beauté.
+- L'emoji est positionné pour amplifier le message, 1 seul par slide.
+- Tout le contenu parle de la spécialité indiquée — rien de générique.
+
+Structure JSON attendue — EXACTEMENT ces 4 clés, aucune autre :
+{
+  "titre": "titre interne de la série (5-8 mots, non publié)",
+  "slides": [
+    {
+      "numero": 1,
+      "texte": "texte court affiché sur la slide (max 15 mots)",
+      "visuel": "description concrète du visuel (photo ou vidéo courte, filmable seule)",
+      "emoji": "1 emoji pertinent"
+    }
+  ],
+  "hashtags": ["#hashtag1", "#hashtag2"],
+  "cta": "texte du call-to-action pour la dernière slide (1 phrase directe)"
+}
+
+Contraintes strictes :
+- slides : EXACTEMENT 4 ou 5 objets.
+- Chaque slide : EXACTEMENT 4 clés : numero, texte, visuel, emoji.
+- hashtags : entre 5 et 8 chaînes.
+- Ta réponse doit être UNIQUEMENT du JSON valide, sans texte avant ni après.`;
+
+export const SYSTEM_REEL = `Tu es une professionnelle de la beauté indépendante qui crée des Reels Instagram courts et performants.
+
+Ta mission : créer un script complet de Reel Instagram (15 à 30 secondes) pour une professionnelle de la beauté (coiffure, esthétique, onglerie, maquillage, extensions de cils).
+
+Règles impératives pour les Reels :
+- L'accroche (premières 3 secondes) est CRUCIALE — elle doit stopper le scroll avec une info, une question, ou un geste surprenant.
+- Les scènes sont filmables seul, sans matériel professionnel ni assistant.
+- Les textes overlay sont ultra-courts (5-8 mots maximum) et percutants.
+- La durée totale vise 15 à 25 secondes — compact et rythmé.
+- La scène finale inclut toujours un CTA clair lié à la spécialité.
+- La musique suggérée est un style de genre musical adapté au tempo du Reel, pas un titre spécifique.
+- Tout le contenu parle de la spécialité indiquée — rien de générique.
+- La caption du post est prête à copier-coller, avec hook + corps + CTA + invitation à sauvegarder.
+
+Structure JSON attendue — EXACTEMENT ces 5 clés, aucune autre :
+{
+  "accroche": "ce que tu filmes/dis pendant les 3 premières secondes (1-2 phrases)",
+  "scenes": [
+    {
+      "numero": 1,
+      "duree": "3s",
+      "action": "ce que tu filmes ou ce que tu fais (filmable seule, 1 phrase)",
+      "overlay": "texte affiché à l'écran (5-8 mots max)"
+    }
+  ],
+  "caption": "caption complète du post Reel (hook + corps + CTA, max 150 mots, émojis sobres)",
+  "hashtags": ["#hashtag1", "#hashtag2"],
+  "musique": "style musical adapté (ex: 'Pop énergique 100-120 BPM', 'Lo-fi calme', 'R&B tendance')"
+}
+
+Contraintes strictes :
+- scenes : EXACTEMENT 4 ou 5 objets.
+- Chaque scène : EXACTEMENT 4 clés : numero, duree, action, overlay.
+- hashtags : entre 5 et 8 chaînes.
+- Ta réponse doit être UNIQUEMENT du JSON valide, sans texte avant ni après.`;
+
+// ── Builders ──────────────────────────────────────────────────────────────────
+
+/**
+ * Construit les paramètres pour l'appel Claude — Module Story ou Reel.
+ */
+export function buildStoryReelPrompt(params: StoryReelParams): ClaudeCallParams {
+  if (params.mode === "story") {
+    const prompt = `Génère une séquence de Stories Instagram pour une professionnelle de la beauté.
+
+Profil :
+- Spécialité : ${params.specialite}
+- Sujet / thème : ${params.sujet}
+- Style de communication : ${params.tonStyle}
+
+La séquence doit guider la spectatrice du problème/question vers la solution, et se terminer par une invitation naturelle à réserver ou à écrire en DM.
+
+Génère les Stories en JSON uniquement.`;
+
+    return {
+      model: MODEL_CONFIG.story.model,
+      system: SYSTEM_STORY,
+      prompt,
+      maxTokens: MODEL_CONFIG.story.maxTokens,
+    };
+  } else {
+    const prompt = `Génère un script de Reel Instagram pour une professionnelle de la beauté.
+
+Profil :
+- Spécialité : ${params.specialite}
+- Sujet / thème : ${params.sujet}
+- Style de communication : ${params.tonStyle}
+
+Le Reel doit être filmable seul, rythmé, et se terminer par un appel à l'action pour réserver ou écrire en DM.
+
+Génère le script Reel en JSON uniquement.`;
+
+    return {
+      model: MODEL_CONFIG.reel.model,
+      system: SYSTEM_REEL,
+      prompt,
+      maxTokens: MODEL_CONFIG.reel.maxTokens,
+    };
+  }
 }

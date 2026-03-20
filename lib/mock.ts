@@ -20,6 +20,8 @@ import type {
   DMOutput,
   HooksOutput,
   PostOutput,
+  StoryOutput,
+  ReelOutput,
 } from "./prompts";
 
 // ── Détection du mode mock ─────────────────────────────────────────────────────
@@ -370,5 +372,112 @@ export function getMockHooks(): HooksOutput {
         reelIdee: "Raconte l'anecdote en voix off sur des images de ton espace de travail",
       },
     ],
+  };
+}
+
+// ── Mock Story ─────────────────────────────────────────────────────────────────
+
+/** Retourne un StoryOutput fictif pour l'essai gratuit / mode mock. */
+export function getMockStory(): StoryOutput {
+  return {
+    titre: "3 gestes qui changent tout pour tes ongles",
+    slides: [
+      {
+        numero: 1,
+        texte: "Tu casses tes ongles tout le temps ? Lis ça 👇",
+        visuel: "Gros plan sur tes mains, regard questionnant vers la caméra",
+        emoji: "🤔",
+      },
+      {
+        numero: 2,
+        texte: "Erreur n°1 — Limer dans les deux sens",
+        visuel: "Démonstration du mauvais geste avec une lime, tu secoues la tête",
+        emoji: "❌",
+      },
+      {
+        numero: 3,
+        texte: "La bonne technique : toujours dans un seul sens",
+        visuel: "Démonstration du bon geste, limage doux dans un sens, tu souris",
+        emoji: "✅",
+      },
+      {
+        numero: 4,
+        texte: "Résultat : ongles plus solides, moins de casse",
+        visuel: "Tes mains soignées posées sur fond neutre, ongles bien visibles",
+        emoji: "💅",
+      },
+      {
+        numero: 5,
+        texte: "Tu veux des ongles en béton ? Envoie-moi 'ONGLES' en DM 📩",
+        visuel: "Toi souriante face caméra, fond de ta couleur de marque",
+        emoji: "📩",
+      },
+    ],
+    hashtags: [
+      "#onglerie",
+      "#astuceongles",
+      "#onglesnatural",
+      "#nailcare",
+      "#beaute",
+      "#prothesisteongulaire",
+    ],
+    cta: "Envoie-moi 'ONGLES' en DM pour réserver ta séance 💌",
+  };
+}
+
+// ── Mock Reel ──────────────────────────────────────────────────────────────────
+
+/** Retourne un ReelOutput fictif pour l'essai gratuit / mode mock. */
+export function getMockReel(): ReelOutput {
+  return {
+    accroche:
+      "Si tu fais ça chaque jour, tes ongles cassent forcément — et je vais te montrer pourquoi 🚨",
+    scenes: [
+      {
+        numero: 1,
+        duree: "3s",
+        action:
+          "Gros plan sur tes mains, tu poses un flacon de dissolvant agressif et tu fais signe 'non'",
+        overlay: "L'erreur que TOUT LE MONDE fait 👇",
+      },
+      {
+        numero: 2,
+        duree: "5s",
+        action:
+          "Tu montres le geste incorrect (limage en va-et-vient rapide) avec expression choquée",
+        overlay: "❌ Ne JAMAIS limer en va-et-vient",
+      },
+      {
+        numero: 3,
+        duree: "5s",
+        action:
+          "Tu montres le bon geste (lime dans un seul sens, doux) avec sourire approbateur",
+        overlay: "✅ Toujours dans UN seul sens",
+      },
+      {
+        numero: 4,
+        duree: "5s",
+        action: "Tu présentes tes ongles parfaits face caméra, tu rayonnes",
+        overlay: "Résultat : ongles solides, zéro casse",
+      },
+      {
+        numero: 5,
+        duree: "3s",
+        action: "Texte centré sur fond de ta couleur de marque",
+        overlay: "📍 DM 'ONGLES' pour réserver",
+      },
+    ],
+    caption:
+      "L'erreur qui casse les ongles naturels — et comment l'éviter 🚨\n\nElle est tellement courante que même mes clientes les plus soigneuses la faisaient sans le savoir.\n\nLimer en va-et-vient chauffe et fragilise la kératine. Résultat : casse garantie.\n\nLa bonne façon : TOUJOURS dans un seul sens, avec douceur.\n\nSauvegarde pour t'en souvenir 💾\n\n📩 Tu veux des ongles en béton ? Envoie-moi 'ONGLES' en DM",
+    hashtags: [
+      "#onglerie",
+      "#astuceongles",
+      "#nailcare",
+      "#onglesnatural",
+      "#reelbeaute",
+      "#beautytips",
+      "#prothesisteongulaire",
+    ],
+    musique: "Pop énergique et tendance, tempo 110-120 BPM",
   };
 }

@@ -137,7 +137,7 @@ export default async function LandingPage({
           <div className="flex items-center gap-3">
             <Link
               href="/login"
-              className="btn btn-ghost hidden sm:inline-flex"
+              className="btn btn-ghost"
               style={{ fontSize: "0.875rem", padding: "0.45rem 1rem" }}
             >
               Se connecter

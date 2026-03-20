@@ -494,3 +494,186 @@ export function exportPlanningPDF(
 
   openPrintWindow(html);
 }
+
+// ── Export Story ───────────────────────────────────────────────────────────────
+
+interface StorySlideExport {
+  numero: number;
+  texte: string;
+  visuel: string;
+  emoji: string;
+}
+
+interface StoryExportData {
+  titre: string;
+  slides: StorySlideExport[];
+  hashtags: string[];
+  cta: string;
+}
+
+export function exportStoryPDF(
+  result: StoryExportData,
+  params: { specialite: string; sujet: string }
+): void {
+  const slidesHTML = result.slides.map((slide) => `
+    <div class="slide-card">
+      <div class="slide-header">
+        <span class="slide-num">${slide.numero}</span>
+        <span class="slide-emoji">${esc(slide.emoji)}</span>
+      </div>
+      <p class="slide-text">&ldquo;${esc(slide.texte)}&rdquo;</p>
+      <div class="slide-visual">
+        <span class="visual-label">📷 Visuel à filmer</span>
+        <span class="visual-text">${esc(slide.visuel)}</span>
+      </div>
+    </div>
+  `).join("");
+
+  const hashtagsHTML = result.hashtags.map((h) => `<span class="tag">${esc(h)}</span>`).join("");
+
+  const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Stories — ${esc(params.sujet)}</title>
+  <style>
+    ${BASE_STYLES}
+    .page { padding: 50px; }
+    .header { padding-bottom: 20px; margin-bottom: 28px; border-bottom: 3px solid ${ACCENT}; }
+    .badge { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: #999; margin-bottom: 10px; }
+    .title { font-size: 20px; font-weight: 700; color: #111; margin-bottom: 6px; }
+    .meta  { font-size: 12px; color: #777; }
+    .slide-card { margin-bottom: 20px; padding: 16px 20px; border: 1px solid ${BORDER}; border-radius: 10px; border-left: 4px solid ${ACCENT}; page-break-inside: avoid; }
+    .slide-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .slide-num { min-width: 26px; height: 26px; border-radius: 50%; background: ${ACCENT}; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+    .slide-emoji { font-size: 16px; }
+    .slide-text  { font-size: 15px; font-weight: 700; color: #111; line-height: 1.4; margin-bottom: 12px; }
+    .slide-visual { background: ${SURFACE}; border-radius: 6px; padding: 8px 12px; display: flex; flex-direction: column; gap: 3px; }
+    .visual-label { font-size: 10px; font-weight: 700; color: ${ACCENT}; }
+    .visual-text  { font-size: 11px; color: #555; line-height: 1.5; }
+    .section-title { font-size: 12px; font-weight: 700; color: ${ACCENT}; margin-bottom: 8px; }
+    .cta-box { background: ${SURFACE}; border: 1px solid ${BORDER}; border-radius: 8px; padding: 12px 16px; font-size: 14px; font-weight: 700; color: ${ACCENT}; margin-bottom: 20px; }
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag { background: ${SURFACE}; border: 1px solid ${BORDER}; padding: 3px 10px; border-radius: 20px; font-size: 11px; color: ${ACCENT}; }
+    .footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid ${BORDER}; font-size: 10px; color: #bbb; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <p class="badge">Séquence Stories · Boss Beauty Studio</p>
+      <h1 class="title">${esc(result.titre || params.sujet)}</h1>
+      <p class="meta">${esc(params.specialite)} · ${result.slides.length} slides</p>
+    </div>
+    ${slidesHTML}
+    <p class="section-title">📣 CTA — Dernière slide</p>
+    <div class="cta-box">${esc(result.cta)}</div>
+    <p class="section-title">Hashtags</p>
+    <div class="tags">${hashtagsHTML}</div>
+    <p class="footer">Généré par Boss Beauty Studio</p>
+  </div>
+</body>
+</html>`;
+
+  openPrintWindow(html);
+}
+
+// ── Export Reel ────────────────────────────────────────────────────────────────
+
+interface ReelSceneExport {
+  numero: number;
+  duree: string;
+  action: string;
+  overlay: string;
+}
+
+interface ReelExportData {
+  accroche: string;
+  scenes: ReelSceneExport[];
+  caption: string;
+  hashtags: string[];
+  musique: string;
+}
+
+export function exportReelPDF(
+  result: ReelExportData,
+  params: { specialite: string; sujet: string }
+): void {
+  const scenesHTML = result.scenes.map((scene) => `
+    <div class="scene-card">
+      <div class="scene-header">
+        <span class="scene-num">${scene.numero}</span>
+        <span class="scene-dur">${esc(scene.duree)}</span>
+      </div>
+      <p class="action-label">🎥 Action</p>
+      <p class="action-text">${esc(scene.action)}</p>
+      <div class="overlay-box">
+        <span class="overlay-label">💬 Texte overlay</span>
+        <span class="overlay-text">${esc(scene.overlay)}</span>
+      </div>
+    </div>
+  `).join("");
+
+  const hashtagsHTML = result.hashtags.map((h) => `<span class="tag">${esc(h)}</span>`).join("");
+
+  const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Script Reel — ${esc(params.sujet)}</title>
+  <style>
+    ${BASE_STYLES}
+    .page { padding: 50px; }
+    .header { padding-bottom: 20px; margin-bottom: 28px; border-bottom: 3px solid ${ACCENT}; }
+    .badge { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: #999; margin-bottom: 10px; }
+    .title { font-size: 20px; font-weight: 700; color: #111; margin-bottom: 6px; }
+    .meta  { font-size: 12px; color: #777; }
+    .accroche-box { margin-bottom: 24px; padding: 14px 18px; background: ${SURFACE}; border-left: 4px solid ${ACCENT}; border-radius: 0 8px 8px 0; }
+    .accroche-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: ${ACCENT}; font-weight: 700; margin-bottom: 6px; }
+    .accroche-text  { font-size: 14px; font-weight: 700; color: #111; line-height: 1.4; }
+    .scene-card { margin-bottom: 16px; padding: 14px 18px; border: 1px solid ${BORDER}; border-radius: 10px; page-break-inside: avoid; }
+    .scene-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .scene-num { min-width: 24px; height: 24px; border-radius: 50%; background: ${ACCENT}; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+    .scene-dur { font-size: 10px; font-weight: 700; color: #aaa; background: ${SURFACE}; border: 1px solid ${BORDER}; padding: 2px 8px; border-radius: 12px; }
+    .action-label  { font-size: 10px; font-weight: 700; color: #888; margin-bottom: 2px; }
+    .action-text   { font-size: 12px; color: #333; line-height: 1.5; margin-bottom: 10px; }
+    .overlay-box { background: ${SURFACE}; border-radius: 6px; padding: 8px 10px; }
+    .overlay-label { font-size: 10px; font-weight: 700; color: ${ACCENT}; display: block; margin-bottom: 3px; }
+    .overlay-text  { font-size: 13px; font-weight: 700; color: #111; }
+    .musique-box { margin-bottom: 20px; padding: 10px 14px; background: ${SURFACE}; border: 1px solid ${BORDER}; border-radius: 8px; }
+    .musique-label { font-size: 10px; font-weight: 700; color: #888; }
+    .musique-text  { font-size: 12px; color: #333; }
+    .section-title { font-size: 12px; font-weight: 700; color: ${ACCENT}; margin-bottom: 8px; }
+    .caption-text  { font-size: 12px; line-height: 1.8; color: #222; white-space: pre-wrap; margin-bottom: 20px; }
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag { background: ${SURFACE}; border: 1px solid ${BORDER}; padding: 3px 10px; border-radius: 20px; font-size: 11px; color: ${ACCENT}; }
+    .footer { margin-top: 32px; padding-top: 12px; border-top: 1px solid ${BORDER}; font-size: 10px; color: #bbb; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <p class="badge">Script Reel Instagram · Boss Beauty Studio</p>
+      <h1 class="title">${esc(params.sujet)}</h1>
+      <p class="meta">${esc(params.specialite)} · ${result.scenes.length} scènes</p>
+    </div>
+    <div class="accroche-box">
+      <p class="accroche-label">⚡ Accroche — 3 premières secondes</p>
+      <p class="accroche-text">${esc(result.accroche)}</p>
+    </div>
+    ${scenesHTML}
+    <div class="musique-box">
+      <p class="musique-label">🎵 Musique suggérée</p>
+      <p class="musique-text">${esc(result.musique)}</p>
+    </div>
+    <p class="section-title">📝 Caption du post</p>
+    <p class="caption-text">${esc(result.caption)}</p>
+    <p class="section-title">Hashtags</p>
+    <div class="tags">${hashtagsHTML}</div>
+    <p class="footer">Généré par Boss Beauty Studio</p>
+  </div>
+</body>
+</html>`;
+
+  openPrintWindow(html);
+}

@@ -21,7 +21,7 @@
 
 import { useState } from "react";
 
-type SaveModule = "post" | "carousel" | "hooks" | "dm";
+type SaveModule = "post" | "carousel" | "hooks" | "dm" | "story" | "reel";
 
 interface SaveButtonProps {
   module: SaveModule;

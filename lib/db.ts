@@ -23,7 +23,7 @@ import { createServiceClient } from "./supabase/server";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type GenerationType = "planning" | "carousel" | "dm" | "hooks" | "post";
+export type GenerationType = "planning" | "carousel" | "dm" | "hooks" | "post" | "story" | "reel";
 
 export interface SaveGenerationParams {
   userId: string;

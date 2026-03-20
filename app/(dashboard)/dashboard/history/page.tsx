@@ -11,7 +11,7 @@ import { useEffect, useState, useCallback } from "react";
 
 // ── Types ─────────────────────────────────────────────────────
 
-type GenerationType = "planning" | "carousel" | "dm" | "hooks" | "post";
+type GenerationType = "planning" | "carousel" | "dm" | "hooks" | "post" | "story" | "reel";
 
 interface Generation {
   id: string;
@@ -30,6 +30,8 @@ const TYPE_LABELS: Record<GenerationType, string> = {
   dm: "Réponse DM",
   hooks: "Accroches Instagram",
   post: "Post Instagram",
+  story: "Stories",
+  reel: "Script Reel",
 };
 
 const TYPE_ICONS: Record<GenerationType, string> = {
@@ -38,6 +40,8 @@ const TYPE_ICONS: Record<GenerationType, string> = {
   dm: "💬",
   hooks: "⚡",
   post: "📸",
+  story: "📱",
+  reel: "🎬",
 };
 
 // Traduction des clés techniques en labels lisibles pour toutes les générations

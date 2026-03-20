@@ -73,6 +73,17 @@ const NAV_ITEMS = [
     ),
   },
   {
+    label: "Story & Reel",
+    href: "/dashboard/story-reel",
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="2" width="20" height="20" rx="5" />
+        <circle cx="12" cy="12" r="3" />
+        <path d="M10 9.5V7m4 2.5V7M10 14.5V17m4-2.5V17" />
+      </svg>
+    ),
+  },
+  {
     label: "Réponse DM",
     href: "/dashboard/dm",
     icon: (
