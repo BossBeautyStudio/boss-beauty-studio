@@ -28,7 +28,6 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Retourne null si pas encore de profil — le client gère ce cas
   return NextResponse.json(data ?? null);
 }
 
@@ -48,6 +47,10 @@ export async function POST(request: Request) {
     ton_style?: string;
     public_cible?: string;
     hashtags_favoris?: string;
+    instagram_handle?: string;
+    ville?: string;
+    services?: string;
+    prix_moyen?: string;
   };
 
   try {
@@ -56,17 +59,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Corps invalide" }, { status: 400 });
   }
 
-  // Upsert — crée ou met à jour selon l'existence du user_id
   const { data, error } = await supabase
     .from("brand_profiles")
     .upsert(
       {
-        user_id: user.id,
-        nom_marque: body.nom_marque ?? null,
-        specialite: body.specialite ?? null,
-        ton_style: body.ton_style ?? null,
-        public_cible: body.public_cible ?? null,
-        hashtags_favoris: body.hashtags_favoris ?? null,
+        user_id:           user.id,
+        nom_marque:        body.nom_marque        ?? null,
+        specialite:        body.specialite        ?? null,
+        ton_style:         body.ton_style         ?? null,
+        public_cible:      body.public_cible      ?? null,
+        hashtags_favoris:  body.hashtags_favoris  ?? null,
+        instagram_handle:  body.instagram_handle  ?? null,
+        ville:             body.ville             ?? null,
+        services:          body.services          ?? null,
+        prix_moyen:        body.prix_moyen        ?? null,
       },
       { onConflict: "user_id" }
     )
